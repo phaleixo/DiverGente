@@ -16,18 +16,16 @@ Por isso, todos os dados são salvos **apenas no seu aparelho**, garantindo que 
 
 Caso queira, você tem a liberdade de **deletar todos os dados armazenados** no aplicativo a qualquer momento.
 
-## Ícone do Aplicativo
-
 <p align="center">
-  <img src="./assets/images/icon.png" width="150" alt="Ícone do aplicativo DiverGente">
+  <img src="./assets/images/splash-icon.png" width="150" alt="Ícone do aplicativo DiverGente">
 </p>
 
-*Observação: Certifique-se de que o caminho `./assets/images/icon.png` esteja correto em relação à localização do seu arquivo `README.md` no repositório.*
 
 ## Download apk
 
 https://github.com/phaleixo/DiverGente/releases/download/V1.0/DiverGente-V1_0.apk
 
+## Download Code
 
 1. Clone Repository
 
