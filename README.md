@@ -59,19 +59,3 @@ DiverGente v1.0 licenciado sob a [MIT License](https://opensource.org/licenses/M
 
 ---
 
-Este README fornece uma visão geral do seu aplicativo, informações sobre privacidade, exibe o ícone (se você o incluir no repositório) e fornece detalhes de contato e licença.
-
-**Observações:**
-
-* **Caminho da imagem:** Ajuste o caminho para o ícone do aplicativo (`./assets/images/icon.png`) se a estrutura de pastas do seu projeto for diferente. Se a imagem estiver hospedada online, use a URL completa.
-* **Badges:** Adicionei badges para a licença, GitHub e e-mail para uma apresentação mais visual.
-* **Download:** Incluí uma seção para download, que você pode preencher com os links das lojas quando seu aplicativo for publicado.
-* **Estilo:** Usei Markdown para formatar o texto com títulos, negrito e links.
-
-Para usar este README no seu repositório GitHub:
-
-1.  Crie um arquivo chamado `README.md` na raiz do seu projeto Expo.
-2.  Copie e cole o conteúdo acima neste arquivo.
-3.  Certifique-se de que o caminho para o ícone do aplicativo esteja correto ou adicione a imagem ao seu repositório no caminho especificado.
-
-Espero que isso ajude! Se precisar de mais alguma coisa, me diga.
