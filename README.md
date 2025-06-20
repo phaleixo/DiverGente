@@ -32,14 +32,20 @@ https://github.com/phaleixo/DiverGente/releases/download/V1.0/DiverGente-V1_0.ap
    ```
    git clone https://github.com/phaleixo/DiverGente.git
    ```
+2. Acess folder
 
-2. Install dependencies
+   ```bash
+   cd Divergente
+   ```
+
+
+3. Install dependencies
 
    ```bash
    npm install
    ```
 
-3. Start the app
+4. Start the app
 
    ```bash
     npx expo start
