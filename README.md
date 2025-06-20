@@ -35,7 +35,7 @@ https://github.com/phaleixo/DiverGente/releases/download/V1.0/DiverGente-V1_0.ap
 2. Acess folder
 
    ```bash
-   cd Divergente
+   cd DiverGente
    ```
 
 
