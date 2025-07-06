@@ -48,7 +48,7 @@ https://github.com/phaleixo/DiverGente/releases/download/V1.0/DiverGente-V1_0.ap
 4. Start the app
 
    ```bash
-    npx expo start
+    npm start
    ```
 
 
