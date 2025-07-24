@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; // <-- importação aqui
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { Colors } from '@/constants/Colors';
 
 interface Task {
   id: number;
@@ -16,12 +17,14 @@ interface Task {
 const TaskListToday: React.FC = () => {
   const [tasksToday, setTasksToday] = useState<Task[]>([]);
   const isDarkMode = useColorScheme() === 'dark';
-  const router = useRouter(); // <-- inicializa o router
+  const router = useRouter();
   const styles = dynamicStyles(isDarkMode);
 
-  useEffect(() => {
-    loadTodayTasks();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadTodayTasks();
+    }, [])
+  );
 
   const loadTodayTasks = async () => {
     const data = await AsyncStorage.getItem('tasks');
@@ -33,18 +36,24 @@ const TaskListToday: React.FC = () => {
         return task.dueDate && task.dueDate <= today && !task.completed;
       });
       setTasksToday(todaysTasks);
+    } else {
+      setTasksToday([]);
     }
   };
 
   const handlePress = () => {
-    router.push('/taskList'); // <-- navega para a página
+    router.push('/taskList');
   };
 
   return (
     <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Feather name="calendar" size={20} color={isDarkMode ? '#FFFFFF' : '#000000'} />
+          <MaterialCommunityIcons
+            name="calendar-month"
+            size={20}
+            color={isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface}
+          />
           <Text style={styles.headerText}>Tarefas de Hoje</Text>
           <View style={styles.taskCountCircle}>
             <Text style={styles.taskCountText}>{tasksToday.length}</Text>
@@ -58,7 +67,7 @@ const TaskListToday: React.FC = () => {
 const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: isDarkMode ? '#151718' : '#FFFFFF',
+    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
   },
   header: {
     flexDirection: 'row',
@@ -71,19 +80,19 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   headerText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: isDarkMode ? '#FFFFFF' : '#000000',
+    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
   },
   taskCountCircle: {
-    backgroundColor: isDarkMode ? '#095BC0' : '#2786C6',
+    backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
     borderRadius: 15,
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
   taskCountText: {
-    color: 'white',
-    fontSize: 16,
+    color: isDarkMode ? Colors.light.onPrimary : Colors.light.onPrimary,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });

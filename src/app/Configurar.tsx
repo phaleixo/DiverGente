@@ -1,19 +1,16 @@
 import React from 'react';
 import { Image, Text, StyleSheet, ScrollView, Linking, useColorScheme, View } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import DataBackupRestore from '@/components/DataBackupRestore';
 
-const Info: React.FC = () => {
+const Config: React.FC = () => {
   const isDarkMode = useColorScheme() === 'dark';
   const styles = dynamicStyles(isDarkMode);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.bodyContainer}>
-        <Text style={styles.title}>Sobre o Aplicativo</Text>
-        <Text style={styles.content}>
-          Equilibre seus pensamentos.
-          {'\n'}
-          Com o DiverGente, é possível registrar suas emoções, tarefas a serem realizadas e também notas de áudio.
-        </Text>
+        <DataBackupRestore />
         
         <Text style={styles.title}>Privacidade</Text>
         <Text style={styles.content}>
@@ -51,7 +48,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
 bodyContainer: {
   flex: 1,
-  backgroundColor: isDarkMode ? '#060606' : '#F5F5F5',
+  backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
   padding: 20,
   
 },
@@ -61,22 +58,22 @@ bodyContainer: {
     fontWeight: 'bold',
     marginBottom: 20,
     marginTop:50,
-    color: isDarkMode ? '#FFFFFF' : '#000000',
+    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
     textAlign: 'center',
   },
   content: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 50,
-    color: isDarkMode ? '#CCCCCC' : '#333333',
+    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
   },
   footer: {
     fontSize: 14,
     textAlign: 'center',
-    color: isDarkMode ? '#CCCCCC' : '#333333',
+    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
   },
   link: {
-    color: isDarkMode ? '#80D8FF' : '#007BFF',
+    color: isDarkMode ? Colors.dark.primary : Colors.light.primary,
   },
   localImage: {
     width: 96,
@@ -87,4 +84,4 @@ bodyContainer: {
     alignSelf: 'center',
   },
 });
-export default Info;
+export default Config;

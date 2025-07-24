@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, useColorScheme, FlatList } from 'react-native';
+import { Stack } from 'expo-router';
 import { WebView } from 'react-native-webview';
+import { Colors } from '@/constants/Colors';
 
 
 // Definindo os vídeos do YouTube
@@ -21,6 +23,10 @@ export default function CalmaSensorialScreen() {
   const isDarkMode = useColorScheme() === 'dark';
   const styles = useMemo(() => dynamicStyles(isDarkMode), [isDarkMode]);
 
+  // Definir cores do header
+  const headerBg = isDarkMode ? Colors.dark.surface : Colors.light.surface;
+  const headerColor = isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface;
+
   const renderItem = ({ item }: { item: typeof videoList[0] }) => (
     <View style={styles.videoContainer}>
       <Text style={styles.videoTitle}>{item.title}</Text>
@@ -34,15 +40,23 @@ export default function CalmaSensorialScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={videoList}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      />
-    </View>
+    <>
+      <Stack.Screen options={{
+        title: 'Calma Sensorial',
+        headerStyle: { backgroundColor: headerBg },
+        headerTintColor: headerColor,
+        headerTitleStyle: { color: headerColor },
+      }} />
+      <View style={styles.container}>
+        <FlatList
+          data={videoList}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        />
+      </View>
+    </>
   );
 }
 
@@ -50,35 +64,30 @@ const dynamicStyles = (isDarkMode: boolean) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDarkMode ? '#0a080d' : '#F5F5F5',
+      backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
       paddingHorizontal: 15,
-      paddingTop: 60,
+      marginTop: 0,
     },
-    header: {
-      fontSize: 26,
-      fontWeight: 'bold',
-      color: isDarkMode ? '#095BC0' : '#2786C6',
-      marginBottom: 20,
-      textAlign: 'center',
-    },
+
     listContent: {
       paddingBottom: 20,
     },
     videoContainer: {
+      marginTop: 20,
       marginBottom: 20,
       borderRadius: 15,
       overflow: 'hidden',
-      backgroundColor: isDarkMode ? '#151718' : '#FFFFFF',
+      backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
       padding: 10,
       elevation: 2,
-      shadowColor: isDarkMode ? '#000' : '#888',
+      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 4,
     },
     videoTitle: {
       fontSize: 18,
-      color: isDarkMode ? '#f8fafc' : '#1e293b',
+      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
       marginBottom: 10,
       fontWeight: '600',
     },
