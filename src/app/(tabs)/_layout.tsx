@@ -25,11 +25,11 @@ export default function TabLayout() {
       screenOptions={{
         animation: 'shift',
         tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.onSurface,
+        tabBarInactiveTintColor: theme.onBackground,
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          height: 70,
+          height: 80,
           backgroundColor: theme.surface,
           borderRadius: 24,
           marginHorizontal: 16,
@@ -45,8 +45,12 @@ export default function TabLayout() {
           borderRadius: 24,
           justifyContent: 'center',
           alignItems: 'center',
-          height: 56,
-          marginVertical: 7,
+          height: '100%',
+          flex: 1,
+          marginTop: 16,
+          
+          
+           
         },
         tabBarActiveBackgroundColor: 'transparent',
         tabBarInactiveBackgroundColor: 'transparent',
@@ -61,6 +65,7 @@ export default function TabLayout() {
           alignItems: 'center',
           
         },
+
         
       }}
     >

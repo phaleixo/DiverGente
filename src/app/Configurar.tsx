@@ -1,15 +1,18 @@
 import React from 'react';
 import { Image, Text, StyleSheet, ScrollView, Linking, useColorScheme, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/Colors';
 import DataBackupRestore from '@/components/DataBackupRestore';
 
 const Config: React.FC = () => {
   const isDarkMode = useColorScheme() === 'dark';
+  const insets = useSafeAreaInsets();
   const styles = dynamicStyles(isDarkMode);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.bodyContainer}>
+    <SafeAreaView style={{flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background}}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 6 }]}> 
+        <View style={styles.bodyContainer}>
         <DataBackupRestore />
         
         <Text style={styles.title}>Privacidade</Text>
@@ -35,7 +38,8 @@ const Config: React.FC = () => {
           {'\n'}
         </Text>
         </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

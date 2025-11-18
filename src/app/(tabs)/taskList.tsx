@@ -270,7 +270,7 @@ const TaskList: React.FC = () => {
                   value={taskText}
                   onChangeText={setTaskText}
                   style={styles.input}
-                  maxLength={30}
+                  maxLength={90}
                 />
                 <TouchableOpacity onPress={() => setShowCalendar(true)} style={styles.dueDateButton}>
                   <Text style={styles.dueDateButtonText}>
