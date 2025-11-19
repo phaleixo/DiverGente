@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TaskListToday from '@/components/TaskListToday';
 import CalendarScreen from '@/components/CalendarScreen';
+import TodayDate from '@/components/TodayDate';
 import { Colors } from '@/constants/Colors';
 import { ThemedView } from '@/components/ThemedView';
 import Title from '@/components/Title';
@@ -19,13 +20,13 @@ export default function HomeScreen() {
   const styles = useMemo(() => dynamicStyles(isDarkMode), [isDarkMode]);
   const router = useRouter();
 
+  
+
   const handlePress = () => {
     router.push('/Configurar');
   };
 
-  const goToCalmaSensorial = () => {
-    router.push('/Sensorial');
-  };
+  
 
   const data: HomeItem[] = [
     {
@@ -40,21 +41,7 @@ export default function HomeScreen() {
         </View>
       ),
     },
-    {
-      id: 'calma',
-      render: () => (
-        <View style={styles.help}>
-          <View style={styles.calm}>
-            <MaterialCommunityIcons name="movie-outline" size={32} color={isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface} />
-            <Text style={styles.cardText}>Acesse a Calma Sensorial</Text>
-            <TouchableOpacity onPress={goToCalmaSensorial} style={styles.chevronButton} hitSlop={{top:10, bottom:10, left:10, right:10}}>
-              <MaterialCommunityIcons name="chevron-right" size={36} color={isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface} />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.cardSubtext}>Vídeos relaxantes para momentos de pausa</Text>
-        </View>
-      ),
-    },
+    
 
   ];
 
@@ -71,12 +58,10 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Title variant="h1" marginTop={20} marginBottom={10}>
-              DiverGente
+            <Title variant="h3" marginTop={20} marginBottom={10}>
+              <TodayDate shortMonth />
             </Title>
-            <TouchableOpacity onPress={handlePress} style={styles.iconButton}>
-              <MaterialCommunityIcons name="cog-outline" size={24} color={isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface} />
-            </TouchableOpacity>
+            
           </View>
         }
         contentContainerStyle={{ padding: 15, paddingBottom: 90 }}

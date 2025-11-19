@@ -3,6 +3,7 @@ import { Image, Text, StyleSheet, ScrollView, Linking, useColorScheme, View } fr
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/Colors';
 import DataBackupRestore from '@/components/DataBackupRestore';
+import Title from '@/components/Title';
 
 const Config: React.FC = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -10,25 +11,26 @@ const Config: React.FC = () => {
   const styles = dynamicStyles(isDarkMode);
 
   return (
+    
     <SafeAreaView style={{flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background}}>
-      <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 6 }]}> 
+      <ScrollView contentContainerStyle={[styles.container]}> 
         <View style={styles.bodyContainer}>
+          <Title variant="h3" marginBottom={10}>
+            Configurações e Backup
+          </Title>
         <DataBackupRestore />
         
         <Text style={styles.title}>Privacidade</Text>
         <Text style={styles.content}>
-          Sua privacidade é muito importante.
-          {'\n'}
-          Por isso todos os dados são salvos apenas no aparelho, e você tem total controle sobre eles.
-          {'\n'}
+          Todos os dados são salvos apenas no aparelho, e você tem total controle sobre eles.
           Caso queira, é possível deletar todos os dados armazenados.
         </Text>
         <Image
-          source={require('../assets/images/icon.png')} 
+          source={require('../../assets/images/icon.png')} 
           style={styles.localImage}
         />
         <Text style={styles.footer}>
-          DiverGente v1.0 licenciado sob a MIT License.
+          DiverGente v2.0 licenciado sob a MIT License.
           {'\n'}
           Desenvolvido por phaleixo.
           {'\n'}
@@ -47,7 +49,8 @@ const Config: React.FC = () => {
 const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
-    padding: 6,
+    padding: 2,
+    marginBottom: 40,
     
   },
 bodyContainer: {
@@ -60,15 +63,15 @@ bodyContainer: {
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    marginTop:50,
+    marginBottom: 10,
+    marginTop:0,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
     textAlign: 'center',
   },
   content: {
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 50,
+    marginBottom: 15,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
   },
   footer: {

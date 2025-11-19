@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Modal, StyleSheet, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@/constants/Colors';
 import Card from '@/components/Card';
@@ -15,7 +16,7 @@ interface DiaryEntry {
 }
 
 const emotions = [
-  '😊 Feliz', '😢 Triste', '😡 Irritado', '😰 Ansioso', '😴 Cansado', '😌 Calmo', '🤔 Pensativo', '😍 Empolgado'
+  '😊 Felizz', '😢 Tristee', '😡 Irritadoo', '😰 Ansiosoo', '😴 Cansadoo', '😌 Calmoo', '🤔 Pensativoo', '😍 Empolgadoo'
 ];
 
 const Diario: React.FC = () => {
@@ -94,9 +95,10 @@ const Diario: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Title variant="h1" marginTop={40} marginBottom={10} marginLeft={20}>
-        Diário
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }}>
+      <View style={styles.container}>
+      <Title variant="h3" marginTop={10} marginBottom={10} marginLeft={20}>
+        Controle de Emoções
       </Title>
       <View style={styles.bodyContainer}>
         <FlatList
@@ -156,18 +158,36 @@ const Diario: React.FC = () => {
               <View style={styles.modalView}>
                 <Text style={styles.modalTitle}>Como você está se sentindo?</Text>
                 <View style={styles.emotionsContainer}>
-                  {emotions.map((emotion) => (
-                    <TouchableOpacity
-                      key={emotion}
-                      style={[
-                        styles.emotionButton,
-                        selectedEmotion === emotion && styles.selectedEmotionButton
-                      ]}
-                      onPress={() => setSelectedEmotion(selectedEmotion === emotion ? '' : emotion)}
-                    >
-                      <Text style={styles.emotionName}>{emotion}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  {emotions.map((emotion) => {
+                    const firstSpace = emotion.indexOf(' ');
+                    let emoji = emotion;
+                    let label = '';
+                    if (firstSpace >= 0) {
+                      emoji = emotion.slice(0, firstSpace);
+                      label = emotion.slice(firstSpace + 1).trim();
+                    }
+                    const isSelected = selectedEmotion === emotion;
+                    return (
+                      <TouchableOpacity
+                        key={emotion}
+                        style={[
+                          styles.emotionButton,
+                          isSelected && styles.selectedEmotionButton
+                        ]}
+                        onPress={() => setSelectedEmotion(isSelected ? '' : emotion)}
+                      >
+                        <Text style={styles.emotionEmoji}>{emoji}</Text>
+                        <Text
+                          style={[
+                            styles.emotionName,
+                            isSelected && { color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary }
+                          ]}
+                        >
+                          {label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
                 <TextInput
                   placeholder="Escreva sobre seu dia..."
@@ -178,12 +198,14 @@ const Diario: React.FC = () => {
                   multiline
                   numberOfLines={4}
                 />
-                <TouchableOpacity onPress={addEntry} style={styles.modalAddButton}>
-                  <Text style={styles.modalAddButtonText}>Salvar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => { setModalVisible(false); setSelectedEmotion(''); }} style={styles.modalCancelButton}>
-                  <Text style={styles.modalCancelButtonText}>Cancelar</Text>
-                </TouchableOpacity>
+                <View style={styles.modalButtonRow}>
+                  <TouchableOpacity onPress={addEntry} style={styles.modalAddButton}>
+                    <Text style={styles.modalAddButtonText}>Salvar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { setModalVisible(false); setSelectedEmotion(''); }} style={styles.modalCancelButton}>
+                    <Text style={styles.modalCancelButtonText}>Cancelar</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
@@ -214,7 +236,8 @@ const Diario: React.FC = () => {
           </View>
         </Modal>
       </View>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -252,7 +275,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   emotionText: {
     fontSize: 18,
     marginBottom: 8,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: isDarkMode ? Colors.dark.primary : Colors.light.onSurface,
   },
   modalBackground: {
     flex: 1,
@@ -268,8 +291,8 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   modalView: {
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
-    borderRadius: 20,
-    padding: 35,
+    borderRadius: 16,
+    padding: 20,
     alignItems: 'center',
     shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
     shadowOffset: {
@@ -279,14 +302,15 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    width: '90%',
+    width: '94%',
     maxHeight: '80%',
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontWeight: '700',
+    marginBottom: 12,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    textAlign: 'left',
   },
   emotionsContainer: {
     flexDirection: 'row',
@@ -296,11 +320,16 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   emotionButton: {
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
-    padding: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 2,
     borderRadius: 20,
-    margin: 5,
+    margin: 4,
     borderWidth: 1,
     borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 100,
+    overflow: 'visible',
   },
   selectedEmotionButton: {
     backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
@@ -309,17 +338,24 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   emotionName: {
     fontSize: 14,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    flexShrink: 0,
+  },
+  emotionEmoji: {
+    fontSize: 18,
+    marginRight: 8,
   },
   input: {
     borderWidth: 1,
     borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
     padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
+    borderRadius: 10,
+    marginBottom: 14,
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
     width: '100%',
     textAlignVertical: 'top',
+    minHeight: 100,
+    
   },
   confirmButton: {
     backgroundColor: isDarkMode ? Colors.dark.error : Colors.light.error,
@@ -355,20 +391,37 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   modalAddButton: {
     backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-    padding: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 10,
-    width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
   },
   modalAddButtonText: {
     color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary,
     fontSize: 18,
   },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 8,
+    gap: 10,
+  },
   modalCancelButton: {
-    marginTop: 10,
+    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    borderWidth: 1,
+    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
   },
   modalCancelButtonText: {
-    color: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
+    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
     textAlign: 'center',
     fontSize: 16,
   },

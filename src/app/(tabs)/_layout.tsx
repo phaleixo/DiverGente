@@ -24,19 +24,27 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         animation: 'shift',
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.onBackground,
+        tabBarActiveTintColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+        tabBarInactiveTintColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onBackground,
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
           height: 80,
           backgroundColor: theme.surface,
-          borderRadius: 24,
-          marginHorizontal: 16,
+          borderRadius: 12,
+          marginHorizontal: 12,
           marginBottom: 12,
           left: 0,
           right: 0,
-        
+          // remove top border / outline and shadows on Android/iOS
+          borderTopWidth: 0,
+          borderWidth: 0,
+          borderColor: 'transparent',
+          elevation: 0,
+          shadowOpacity: 0,
+          shadowOffset: { width: 0, height: 0 },
+          shadowColor: 'transparent',
+          overflow: 'visible',
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
@@ -47,7 +55,7 @@ export default function TabLayout() {
           alignItems: 'center',
           height: '100%',
           flex: 1,
-          marginTop: 16,
+          marginTop: 12,
           
           
            
@@ -105,6 +113,16 @@ export default function TabLayout() {
           title: 'Decisão',
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons size={28} name="shield-outline" color={color} />
+          ),
+          tabBarButton: NoFeedbackTabButton,
+        }}
+      />
+      <Tabs.Screen
+        name="Configurar"
+        options={{
+          title: 'Configure',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons size={28} name="cog-outline" color={color} />
           ),
           tabBarButton: NoFeedbackTabButton,
         }}

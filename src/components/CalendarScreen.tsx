@@ -37,6 +37,16 @@ type EventsByDate = {
 };
 
 const CalendarScreen = () => {
+  // util: converte hex para rgba com alpha
+  const hexToRgba = (hex: string, alpha = 1) => {
+    const normalized = hex.replace('#', '');
+    const bigint = parseInt(normalized, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   // Configuração de tema
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
@@ -243,20 +253,23 @@ const CalendarScreen = () => {
           <FlatList
             data={events[selectedDate]}
             keyExtractor={(item, index) => `${item.text}-${index}`}
-            renderItem={({ item, index }) => (
-              <View style={styles.eventRow}>
-                <Text style={[styles.eventText, { color: item.color }]}>• {item.text}</Text>
-                <TouchableOpacity onPress={() => confirmDeleteEvent(index)}>
-                  <View style={styles.trashCircle}>
-                    <MaterialCommunityIcons
-                      name="trash-can-outline"
-                      size={16}
-                      color="#fff"
-                    />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
+            renderItem={({ item, index }) => {
+              // suaviza a cor do card aplicando alpha para um visual mais agradável
+              return (
+                <View style={[styles.eventCard, { backgroundColor: hexToRgba(item.color, isDarkMode ? 0.18 : 0.12) }]}> 
+                  <Text style={[styles.eventText, { color: themeColors.onSurface }]}>• {item.text}</Text>
+                  <TouchableOpacity onPress={() => confirmDeleteEvent(index)}>
+                    <View style={styles.trashOnColor}>
+                      <MaterialCommunityIcons
+                        name="trash-can-outline"
+                        size={16}
+                        color={themeColors.onSurface}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
           />
         </View>
       )}
@@ -333,7 +346,16 @@ const CalendarScreen = () => {
                     styles.colorOption,
                     {
                       backgroundColor: color,
-                      borderColor: eventColor === color ? '#000' : '#ccc',
+                      borderColor: eventColor === color ? (isDarkMode ? '#ffffff' : '#000000') : themeColors.outline,
+                      borderWidth: eventColor === color ? 2 : 1,
+                      transform: eventColor === color ? [{ scale: 1.04 }] : [{ scale: 1 }],
+                      ...(eventColor === color && isDarkMode ? {
+                        shadowColor: '#ffffff',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.12,
+                        shadowRadius: 3,
+                        elevation: 4,
+                      } : {}),
                     }
                   ]}
                 />
@@ -482,7 +504,25 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       height: 30,
       borderRadius: 15,
       margin: 5,
-      borderWidth: 2,
+      borderWidth: 3,
+    },
+    eventCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+      marginVertical: 6,
+    },
+    trashOnColor: {
+      backgroundColor: themeColors.surface,
+      borderRadius: 12,
+      width: 28,
+      height: 28,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 10,
     },
   });
 

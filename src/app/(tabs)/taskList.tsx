@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Modal, StyleSheet, useColorScheme, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from 'react-native-calendars';
 import { Colors } from '@/constants/Colors';
@@ -135,10 +136,11 @@ const TaskList: React.FC = () => {
   });
 
   return (
-    <View style={styles.container}>
-      <Title variant="h1" marginTop={40} marginBottom={10} marginLeft={20}>
-        Tarefas
-      </Title>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }}>
+      <View style={styles.container}>
+        <Title variant="h3" marginTop={10} marginBottom={10} marginLeft={20}>
+          Minhas Tarefas
+        </Title>
 
       {/* Chips de filtro */}
       <View style={styles.chipContainer}>
@@ -355,7 +357,8 @@ const TaskList: React.FC = () => {
           </View>
         </Modal>
       </View>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -443,16 +446,16 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   modalView: {
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
-    borderRadius: 20,
-    padding: 25,
-    alignItems: 'center',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'stretch',
     shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    width: 320,
-    minHeight: 280,
+    width: '94%',
+    minHeight: 260,
     maxWidth: '95%',
     justifyContent: 'center',
   },
@@ -460,11 +463,12 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     borderWidth: 1,
     borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
     padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
+    borderRadius: 10,
+    marginBottom: 14,
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
     width: '100%',
+    minHeight: 48,
   },
   dueDateButton: {
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
@@ -513,9 +517,10 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   modalAddButton: {
     backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
     flex: 1,
     marginRight: 8,
   },
@@ -525,13 +530,16 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     fontWeight: 'bold',
   },
   modalCancelButton: {
-    backgroundColor: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
+    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
     flex: 1,
     marginLeft: 8,
+    borderWidth: 1,
+    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
   },
   modalCancelButtonText: {
     color: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
@@ -546,17 +554,17 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     marginTop: 10,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   modalButtonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    marginTop: 15,
+    marginTop: 8,
   },
   chipContainer: {
     flexDirection: 'row',

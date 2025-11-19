@@ -7,8 +7,8 @@ import {
   FlatList,
   TouchableOpacity,
   useColorScheme,
-  
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@/constants/Colors';
@@ -217,13 +217,13 @@ const DecisionScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      
-      <View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }}>
+      <View style={styles.container}>
+        <View>
 
-        <Title variant="h2" marginBottom={10} marginTop={40}>
-            Apoio a Decisão
-        </Title>
+          <Title variant="h3" marginBottom={10} marginTop={10}>
+              Apoio a Decisão
+          </Title>
         <FlatList
           data={history}
           showsVerticalScrollIndicator={false}
@@ -272,8 +272,9 @@ const DecisionScreen = () => {
           }
           contentContainerStyle={{ paddingBottom: 100 }}
         />
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
