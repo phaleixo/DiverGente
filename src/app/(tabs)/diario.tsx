@@ -128,7 +128,7 @@ const Diario: React.FC = () => {
                       <MaterialCommunityIcons
                         name="trash-can-outline"
                         size={24}
-                        color={isDarkMode ? Colors.dark.errorContainer : Colors.light.errorContainer}
+                        color={isDarkMode ? Colors.dark.error : Colors.light.error}
                       />
                     </TouchableOpacity>
                   </View>

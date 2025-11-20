@@ -30,7 +30,7 @@ export default function TabLayout() {
       screenOptions={{
         animation: 'shift',
         tabBarActiveTintColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-        tabBarInactiveTintColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onBackground,
+        tabBarInactiveTintColor: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',

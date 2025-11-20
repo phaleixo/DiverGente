@@ -222,7 +222,7 @@ const TaskList: React.FC = () => {
                           backgroundColor: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
                           marginBottom: 8,
                           borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
-                          borderWidth: 2,
+                          borderWidth: 1,
                         }
                       ]}
                     >
@@ -239,7 +239,7 @@ const TaskList: React.FC = () => {
                       <MaterialCommunityIcons 
                         name="trash-can-outline" 
                         size={24} 
-                        color={isDarkMode ? Colors.dark.errorContainer : Colors.light.errorContainer} 
+                        color={isDarkMode ? Colors.dark.error : Colors.light.error} 
                       />
                     </TouchableOpacity>
                   </View>
