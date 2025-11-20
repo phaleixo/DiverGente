@@ -219,15 +219,17 @@ const TaskList: React.FC = () => {
                       style={[
                         styles.completeButton,
                         { 
-                          backgroundColor: isDarkMode ? Colors.dark.sucess : Colors.light.sucess,
+                          backgroundColor: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
                           marginBottom: 8,
+                          borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+                          borderWidth: 2,
                         }
                       ]}
                     >
                       <MaterialCommunityIcons
                         name={item.completed ? 'check-all' : 'check'}
                         size={24}
-                        color={isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary}
+                        color={isDarkMode ? Colors.dark.sucess : Colors.light.sucess}
                       />
                     </TouchableOpacity>
                     <TouchableOpacity 
@@ -237,7 +239,7 @@ const TaskList: React.FC = () => {
                       <MaterialCommunityIcons 
                         name="trash-can-outline" 
                         size={24} 
-                        color={isDarkMode ? Colors.dark.onError : Colors.light.onError} 
+                        color={isDarkMode ? Colors.dark.errorContainer : Colors.light.errorContainer} 
                       />
                     </TouchableOpacity>
                   </View>
@@ -425,7 +427,9 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     fontSize: 14,
   },
   deleteButton: {
-    backgroundColor: isDarkMode ? Colors.dark.error : Colors.light.error,
+    backgroundColor: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
+    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    borderWidth: 1,
     padding: 8,
     borderRadius: 10,
     minWidth: 48,
@@ -448,7 +452,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
     borderRadius: 16,
     padding: 20,
-    alignItems: 'stretch',
+    alignItems: 'center',
     shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,

@@ -128,7 +128,7 @@ const Diario: React.FC = () => {
                       <MaterialCommunityIcons
                         name="trash-can-outline"
                         size={24}
-                        color={isDarkMode ? Colors.dark.onError : Colors.light.onError}
+                        color={isDarkMode ? Colors.dark.errorContainer : Colors.light.errorContainer}
                       />
                     </TouchableOpacity>
                   </View>
@@ -444,7 +444,9 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   deleteButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: isDarkMode ? Colors.dark.error : Colors.light.error,
+    backgroundColor: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
+    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 40,

@@ -510,7 +510,7 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingVertical: 8,
+      paddingVertical: 0,
       paddingHorizontal: 12,
       borderRadius: 12,
       marginVertical: 6,

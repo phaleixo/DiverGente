@@ -3,7 +3,7 @@ import React from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { TouchableWithoutFeedback, View } from 'react-native';
+import { TouchableWithoutFeedback, View, StatusBar } from 'react-native';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 
 export default function TabLayout() {
@@ -21,7 +21,12 @@ export default function TabLayout() {
     </TouchableWithoutFeedback>
   );
   return (
-    <Tabs
+    <>
+      <StatusBar
+        backgroundColor={theme.background}
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+      />
+      <Tabs
       screenOptions={{
         animation: 'shift',
         tabBarActiveTintColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
@@ -128,6 +133,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </>
   );
 }
 
