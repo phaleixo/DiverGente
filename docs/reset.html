@@ -1,88 +1,233 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Redefinir senha</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redefinir Senha - DiverGente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body {
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
-          Arial;
-        background: #f7f8fb;
-        color: #111;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
+        min-height: 100vh;
       }
-      .card {
-        background: #fff;
-        padding: 24px;
-        border-radius: 12px;
-        box-shadow: 0 6px 18px rgba(20, 20, 40, 0.06);
+
+      .logo-glow {
+        animation: glow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes glow {
+        from {
+          filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
+        }
+        to {
+          filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.8));
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .input-group {
+        position: relative;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 40px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6b7280;
+        transition: color 0.2s;
+      }
+
+      .toggle-password:hover {
+        color: #8b5cf6;
+      }
+
+      .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 4px;
+        transition: all 0.3s;
+      }
+
+      .password-strength.weak {
+        background-color: #ef4444;
+        width: 25%;
+      }
+
+      .password-strength.fair {
+        background-color: #f59e0b;
+        width: 50%;
+      }
+
+      .password-strength.good {
+        background-color: #10b981;
+        width: 75%;
+      }
+
+      .password-strength.strong {
+        background-color: #10b981;
         width: 100%;
-        max-width: 420px;
       }
-      h1 {
-        font-size: 20px;
-        margin: 0 0 12px;
+
+      .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 8px;
       }
-      label {
-        display: block;
-        margin-top: 12px;
-        font-size: 14px;
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
-      input {
-        width: 100%;
-        padding: 10px 12px;
-        margin-top: 6px;
-        border-radius: 8px;
-        border: 1px solid #d8dbe6;
+
+      .shake {
+        animation: shake 0.5s;
       }
-      button {
-        margin-top: 16px;
-        width: 100%;
-        padding: 10px 12px;
-        border-radius: 8px;
-        border: 0;
-        background: #005faf;
-        color: #fff;
-        font-weight: 600;
-      }
-      .muted {
-        color: #666;
-        font-size: 13px;
-        margin-top: 8px;
-      }
-      .success {
-        color: #0a8a0a;
-      }
-      .error {
-        color: #c22;
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
       }
     </style>
   </head>
-  <body>
-    <div class="card">
-      <h1>Redefinir sua senha</h1>
-      <div id="info" class="muted">Carregando...</div>
+  <body class="flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center">
+      <!-- Logo DiverGente -->
+      <div class="mb-8 fade-in">
+        <img
+          src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f512.svg"
+          alt="Ícone de cadeado"
+          class="w-32 h-32 mx-auto logo-glow"
+        />
+        <h1 class="text-4xl font-bold text-gray-900 mt-4">DiverGente</h1>
+        <p class="text-gray-600 mt-2">Redefinição de Senha</p>
+      </div>
 
-      <div id="form" style="display: none">
-        <label for="password">Nova senha</label>
-        <input
-          id="password"
-          type="password"
-          placeholder="Digite a nova senha"
-        />
-        <label for="password2">Confirmar senha</label>
-        <input
-          id="password2"
-          type="password"
-          placeholder="Repita a nova senha"
-        />
-        <button id="submit">Salvar nova senha</button>
-        <div id="result" style="margin-top: 12px"></div>
+      <!-- Card de redefinição -->
+      <div
+        class="bg-white rounded-2xl shadow-lg p-8 fade-in"
+        style="animation-delay: 0.2s"
+      >
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">
+          Redefinir sua senha
+        </h2>
+
+        <div id="info" class="text-gray-700 mb-6 p-4 rounded-lg bg-blue-50">
+          <i class="fas fa-spinner fa-spin mr-2 text-blue-500"></i>
+          Carregando...
+        </div>
+
+        <!-- Formulário de redefinição -->
+        <div id="form" style="display: none">
+          <div class="mb-6 text-left">
+            <label for="password" class="block text-gray-700 font-medium mb-2">
+              Nova senha
+            </label>
+            <div class="input-group">
+              <input
+                id="password"
+                type="password"
+                placeholder="Digite a nova senha"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+              />
+              <span class="toggle-password" id="togglePassword1">
+                <i class="far fa-eye"></i>
+              </span>
+            </div>
+            <div id="password-strength" class="password-strength"></div>
+            <div id="password-hints" class="text-xs text-gray-500 mt-2">
+              <div class="flex items-center mb-1">
+                <i class="fas fa-check-circle text-green-500 mr-2" id="length-check" style="display: none"></i>
+                <i class="far fa-circle text-gray-300 mr-2" id="length-uncheck"></i>
+                <span>Pelo menos 6 caracteres</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-6 text-left">
+            <label for="password2" class="block text-gray-700 font-medium mb-2">
+              Confirmar senha
+            </label>
+            <div class="input-group">
+              <input
+                id="password2"
+                type="password"
+                placeholder="Repita a nova senha"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
+              />
+              <span class="toggle-password" id="togglePassword2">
+                <i class="far fa-eye"></i>
+              </span>
+            </div>
+            <div id="password-match" class="text-xs text-gray-500 mt-2">
+              <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-500 mr-2" id="match-check" style="display: none"></i>
+                <i class="far fa-circle text-gray-300 mr-2" id="match-uncheck"></i>
+                <span>As senhas devem coincidir</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            id="submit"
+            class="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition flex items-center justify-center"
+          >
+            <div class="loading-spinner"></div>
+            <span>Salvar nova senha</span>
+          </button>
+
+          <div id="result" class="mt-6 text-center"></div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t">
+          <p class="text-sm text-gray-500 mb-2">Dúvidas ou problemas?</p>
+          <a
+            href="#"
+            class="text-purple-600 hover:text-purple-800 text-sm font-medium"
+          >
+            <i class="fas fa-headset mr-1"></i> Entre em contato com nosso
+            suporte
+          </a>
+        </div>
+      </div>
+
+      <!-- Rodapé simples -->
+      <div
+        class="mt-8 text-sm text-gray-500 fade-in"
+        style="animation-delay: 0.5s"
+      >
+        <p>© 2025 DiverGente. Todos os direitos reservados.</p>
       </div>
     </div>
 
@@ -94,10 +239,101 @@
       const SUPABASE_ANON_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56ZXB1Z2R4eWN3emR5dGljeHByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3MDgyNjQsImV4cCI6MjA4MDI4NDI2NH0.m9c8srIoIih9kL1ZVGXIsH-09sxLS1TSwj8cEeUUhEY";
 
+      // Elementos DOM
       const info = document.getElementById("info");
       const form = document.getElementById("form");
-      const submit = document.getElementById("submit");
+      const submitBtn = document.getElementById("submit");
       const result = document.getElementById("result");
+      const loadingSpinner = submitBtn.querySelector(".loading-spinner");
+      const passwordInput = document.getElementById("password");
+      const password2Input = document.getElementById("password2");
+      const passwordStrength = document.getElementById("password-strength");
+      const lengthCheck = document.getElementById("length-check");
+      const lengthUncheck = document.getElementById("length-uncheck");
+      const matchCheck = document.getElementById("match-check");
+      const matchUncheck = document.getElementById("match-uncheck");
+
+      // Função para alternar visibilidade da senha
+      function setupPasswordToggle() {
+        const togglePassword1 = document.getElementById("togglePassword1");
+        const togglePassword2 = document.getElementById("togglePassword2");
+        
+        togglePassword1.addEventListener("click", function() {
+          const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+          passwordInput.setAttribute("type", type);
+          this.querySelector("i").classList.toggle("fa-eye");
+          this.querySelector("i").classList.toggle("fa-eye-slash");
+        });
+        
+        togglePassword2.addEventListener("click", function() {
+          const type = password2Input.getAttribute("type") === "password" ? "text" : "password";
+          password2Input.setAttribute("type", type);
+          this.querySelector("i").classList.toggle("fa-eye");
+          this.querySelector("i").classList.toggle("fa-eye-slash");
+        });
+      }
+
+      // Função para verificar força da senha
+      function checkPasswordStrength(password) {
+        if (!password) {
+          passwordStrength.className = "password-strength";
+          return;
+        }
+        
+        let strength = 0;
+        
+        // Verifica comprimento
+        if (password.length >= 6) {
+          strength += 1;
+          lengthCheck.style.display = "inline-block";
+          lengthUncheck.style.display = "none";
+        } else {
+          lengthCheck.style.display = "none";
+          lengthUncheck.style.display = "inline-block";
+        }
+        
+        // Verifica se tem números
+        if (/\d/.test(password)) strength += 1;
+        
+        // Verifica se tem letras minúsculas e maiúsculas
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+        
+        // Verifica se tem caracteres especiais
+        if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+        
+        // Atualiza indicador visual
+        if (password.length < 6) {
+          passwordStrength.className = "password-strength weak";
+        } else if (strength <= 2) {
+          passwordStrength.className = "password-strength fair";
+        } else if (strength === 3) {
+          passwordStrength.className = "password-strength good";
+        } else {
+          passwordStrength.className = "password-strength strong";
+        }
+      }
+
+      // Função para verificar se as senhas coincidem
+      function checkPasswordMatch() {
+        const p1 = passwordInput.value;
+        const p2 = password2Input.value;
+        
+        if (!p1 || !p2) {
+          matchCheck.style.display = "none";
+          matchUncheck.style.display = "inline-block";
+          return false;
+        }
+        
+        if (p1 === p2) {
+          matchCheck.style.display = "inline-block";
+          matchUncheck.style.display = "none";
+          return true;
+        } else {
+          matchCheck.style.display = "none";
+          matchUncheck.style.display = "inline-block";
+          return false;
+        }
+      }
 
       function getQueryParam(name) {
         const params = new URLSearchParams(window.location.search);
@@ -105,7 +341,6 @@
       }
 
       function getHashParam(name) {
-        // hash pode vir no formato #access_token=...&type=... ou com leading #/
         const raw = window.location.hash
           ? window.location.hash.replace(/^#\/?/, "")
           : "";
@@ -122,22 +357,44 @@
       const type = getQueryParam("type") || getHashParam("type");
 
       if (!accessToken) {
-        info.textContent =
-          "Link inválido ou sem token. Verifique o email e tente novamente.";
-        info.className = "muted error";
+        info.innerHTML = `
+          <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+          Link inválido ou sem token. Verifique o email e tente novamente.
+        `;
+        info.className = "text-red-700 mb-6 p-4 rounded-lg bg-red-50";
       } else if (type && type !== "recovery") {
-        info.textContent =
-          "Link de autenticação inválido para redefinição de senha.";
-        info.className = "muted error";
+        info.innerHTML = `
+          <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+          Link de autenticação inválido para redefinição de senha.
+        `;
+        info.className = "text-red-700 mb-6 p-4 rounded-lg bg-red-50";
       } else {
-        info.textContent = "Insira sua nova senha.";
-        info.className = "muted";
+        info.innerHTML = `
+          <i class="fas fa-key text-blue-500 mr-2"></i>
+          Insira sua nova senha abaixo.
+        `;
+        info.className = "text-blue-700 mb-6 p-4 rounded-lg bg-blue-50";
         form.style.display = "block";
+        setupPasswordToggle();
+        
+        // Event listeners para validação em tempo real
+        passwordInput.addEventListener("input", function() {
+          checkPasswordStrength(this.value);
+          checkPasswordMatch();
+        });
+        
+        password2Input.addEventListener("input", checkPasswordMatch);
       }
 
       async function resetPassword(newPassword) {
-        result.textContent = "";
+        // Mostrar estado de carregamento
+        submitBtn.disabled = true;
+        loadingSpinner.style.display = "block";
+        
+        // Limpar resultados anteriores
+        result.innerHTML = "";
         result.className = "";
+        
         try {
           const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
             method: "PUT",
@@ -150,44 +407,100 @@
           });
 
           const data = await res.json().catch(() => ({}));
+          
+          // Restaurar estado do botão
+          submitBtn.disabled = false;
+          loadingSpinner.style.display = "none";
+          
           if (!res.ok) {
-            result.textContent = data?.message
-              ? data.message
-              : "Erro ao redefinir senha.";
-            result.className = "error";
+            result.innerHTML = `
+              <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+              ${data?.message ? data.message : "Erro ao redefinir senha."}
+            `;
+            result.className = "text-red-700 p-4 rounded-lg bg-red-50";
+            
+            // Efeito de shake no formulário
+            form.classList.add("shake");
+            setTimeout(() => form.classList.remove("shake"), 500);
+            
             return;
           }
 
-          result.textContent =
-            "Senha redefinida com sucesso. Você já pode entrar com a nova senha.";
-          result.className = "success";
-          // opcional: redirecionar para página de login
-          // window.location.href = 'https://seu-site.com/login';
+          // Sucesso
+          result.innerHTML = `
+            <div class="mb-4">
+              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check-circle text-green-600 text-3xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2">Senha Redefinida!</h3>
+              <p class="text-gray-600">
+                Sua senha foi alterada com sucesso. Agora você pode fazer login com a nova senha.
+              </p>
+            </div>
+          `;
+          result.className = "text-green-700 p-4 rounded-lg bg-green-50";
+          
+          // Desabilitar formulário após sucesso
+          passwordInput.disabled = true;
+          password2Input.disabled = true;
+          submitBtn.disabled = true;
+          
+          // Redirecionar após 5 segundos (opcional)
+          setTimeout(() => {
+            // window.location.href = 'https://seu-site.com/login';
+          }, 5000);
         } catch (e) {
-          result.textContent = "Erro de rede ao tentar redefinir a senha.";
-          result.className = "error";
+          // Restaurar estado do botão
+          submitBtn.disabled = false;
+          loadingSpinner.style.display = "none";
+          
+          result.innerHTML = `
+            <i class="fas fa-wifi text-red-500 mr-2"></i>
+            Erro de rede ao tentar redefinir a senha. Verifique sua conexão.
+          `;
+          result.className = "text-red-700 p-4 rounded-lg bg-red-50";
         }
       }
 
-      submit.addEventListener("click", () => {
-        const p1 = document.getElementById("password").value;
-        const p2 = document.getElementById("password2").value;
+      submitBtn.addEventListener("click", () => {
+        const p1 = passwordInput.value;
+        const p2 = password2Input.value;
+        
         if (!p1 || !p2) {
-          result.textContent = "Preencha ambos os campos.";
-          result.className = "error";
+          result.innerHTML = `
+            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+            Preencha ambos os campos.
+          `;
+          result.className = "text-red-700 p-4 rounded-lg bg-red-50";
           return;
         }
+        
         if (p1 !== p2) {
-          result.textContent = "As senhas não coincidem.";
-          result.className = "error";
+          result.innerHTML = `
+            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+            As senhas não coincidem.
+          `;
+          result.className = "text-red-700 p-4 rounded-lg bg-red-50";
           return;
         }
+        
         if (p1.length < 6) {
-          result.textContent = "A senha deve ter ao menos 6 caracteres.";
-          result.className = "error";
+          result.innerHTML = `
+            <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+            A senha deve ter pelo menos 6 caracteres.
+          `;
+          result.className = "text-red-700 p-4 rounded-lg bg-red-50";
           return;
         }
+        
         resetPassword(p1);
+      });
+
+      // Permitir envio com Enter
+      password2Input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          submitBtn.click();
+        }
       });
     </script>
   </body>
