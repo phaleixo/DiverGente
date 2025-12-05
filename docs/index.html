@@ -9,29 +9,32 @@
       // Redireciona para a página adequada com os mesmos query params
       (function () {
         const params = window.location.search;
-          const hash = window.location.hash || '';
+        const hash = window.location.hash || "";
         const urlParams = new URLSearchParams(params);
         const type = urlParams.get("type");
 
         // Se for recuperação de senha -> reset
         if (type === "recovery") {
-           // preserve search params and hash fragment when redirecting
-           window.location.href = "./reset.html" + params + hash;
+          // preserve search params and hash fragment when redirecting
+          window.location.href = "./reset.html" + params + hash;
           return;
         }
 
         // Se for confirmação de signup -> confirm
         if (type === "signup" || type === "invite" || type === "confirmation") {
-           window.location.href = "./confirm.html" + params + hash;
+          window.location.href = "./confirm.html" + params + hash;
           return;
         }
 
         // Padrão: mostra uma instrução simples ou redireciona para reset
         if (params && params.length > 1) {
-          // fallback: se tiver token, presume recovery
-          if (urlParams.get("access_token") || urlParams.get("token")) {
-            if (urlParams.get("access_token") || urlParams.get("token") || (window.location.hash && window.location.hash.length > 1)) {
-              window.location.href = "./reset.html" + params + hash;
+          // fallback: se tiver token (na query ou no hash), presume recovery
+          if (
+            urlParams.get("access_token") ||
+            urlParams.get("token") ||
+            (window.location.hash && window.location.hash.length > 1)
+          ) {
+            window.location.href = "./reset.html" + params + hash;
             return;
           }
         }
