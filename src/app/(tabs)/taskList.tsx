@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Modal, StyleSheet, useColorScheme, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchTasks, upsertTask as sbUpsertTask, deleteTask as sbDeleteTask } from '@/services/supabaseService';
 import { Calendar } from 'react-native-calendars';
 import { Colors } from '@/constants/Colors';
 import Card from '@/components/Card';
@@ -67,6 +68,11 @@ const TaskList: React.FC = () => {
     const updatedTasks = sortTasks([newTask, ...tasks]);
     setTasks(updatedTasks);
     await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    try {
+      await sbUpsertTask(newTask as any);
+    } catch (e) {
+      // Falha na sincronização — continua funcionando offline
+    }
     setTaskText('');
     setDueDate(undefined);
     setShowCalendar(false);
@@ -77,6 +83,11 @@ const TaskList: React.FC = () => {
     const updatedTasks = sortTasks(tasks.filter(task => task.id !== taskId));
     setTasks(updatedTasks);
     await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    try {
+      await sbDeleteTask(taskId);
+    } catch (e) {
+      // ignore
+    }
     setConfirmModalVisible(false);
   };
 
@@ -100,6 +111,12 @@ const TaskList: React.FC = () => {
     const sortedTasks = sortTasks(updatedTasks);
     setTasks(sortedTasks);
     await AsyncStorage.setItem('tasks', JSON.stringify(sortedTasks));
+    try {
+      const t = sortedTasks.find(t => t.id === taskId);
+      if (t) await sbUpsertTask(t as any);
+    } catch (e) {
+      // ignore
+    }
 
     Animated.sequence([
       Animated.timing(animation, {
@@ -116,6 +133,25 @@ const TaskList: React.FC = () => {
   };
 
   const loadTasks = async () => {
+    try {
+      const { data, error } = await fetchTasks();
+      if (data) {
+        const mapped = data.map((row: any) => ({
+          id: Number(row.id) || Date.now(),
+          text: row.text,
+          completed: !!row.completed,
+          createdAt: row.created_at || new Date().toLocaleString(),
+          completedAt: row.completed_at || undefined,
+          dueDate: row.due_date || undefined,
+        }));
+        setTasks(sortTasks(mapped));
+        await AsyncStorage.setItem('tasks', JSON.stringify(mapped));
+        return;
+      }
+    } catch (e) {
+      // falha na rede / supabase — fallback para local
+    }
+
     const data = await AsyncStorage.getItem('tasks');
     if (data) {
       setTasks(sortTasks(JSON.parse(data)));
@@ -471,8 +507,8 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     marginBottom: 14,
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
     color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-    width: '100%',
-    minHeight: 48,
+    maxWidth: '100%',
+    minWidth: '100%',
   },
   dueDateButton: {
     backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,

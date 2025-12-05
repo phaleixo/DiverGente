@@ -1,16 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  useColorScheme,
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, useColorScheme,} from'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import supabaseService from '@/services/supabaseService';
 import { Colors } from '@/constants/Colors';
 import Title from '@/components/Title';
 
@@ -47,10 +40,89 @@ const DecisionScreen = () => {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const saved = await AsyncStorage.getItem('@decision_history');
-        if (saved) {
-          setHistory(JSON.parse(saved));
+        // Busca remoto e local, depois faz merge bidirecional
+        let remote: any[] = [];
+        try {
+          const { data, error } = await supabaseService.fetchDecisions();
+          if (!error && Array.isArray(data)) remote = data;
+        } catch (err) {
+          console.debug('fetchDecisions failed:', err);
+          remote = [];
         }
+
+        let local: DecisionHistoryItem[] = [];
+        try {
+          const saved = await AsyncStorage.getItem('@decision_history');
+          if (saved) local = JSON.parse(saved);
+        } catch (err) {
+          console.debug('loading local decision history failed:', err);
+          local = [];
+        }
+
+        const remoteById: Record<string, any> = {};
+        remote.forEach((d) => {
+          if (!d || !d.id) return;
+          remoteById[d.id.toString()] = d;
+        });
+
+        // Items locais que não existem remotamente => subir
+        const toSyncLocals: DecisionHistoryItem[] = [];
+        local.forEach((l) => {
+          if (!l.id) return;
+          if (!remoteById[l.id.toString()]) {
+            toSyncLocals.push(l);
+          }
+        });
+
+        // Construir lista final: comece com remotos (mais recentes primeiro), depois locais únicos
+        const mappedRemote: DecisionHistoryItem[] = remote.map((d: any) => ({
+          id: d.id,
+          problem: d.problem,
+          positivePoints: d.positive_points ?? [],
+          negativePoints: d.negative_points ?? [],
+          reflection: d.reflection ?? '',
+          overallSentiment: d.overall_sentiment ?? '',
+          timestamp: d.created_at ?? new Date().toLocaleString(),
+        }));
+
+        const merged = [...mappedRemote];
+        // append local-only items
+        toSyncLocals.forEach((l) => merged.push(l));
+
+        // ordenar por timestamp/created (tenta parse ISO, senão fallback para string)
+        merged.sort((a, b) => {
+          const ta = Date.parse(a.timestamp) || 0;
+          const tb = Date.parse(b.timestamp) || 0;
+          return tb - ta;
+        });
+
+        setHistory(merged);
+
+        // Persiste merged localmente
+        try {
+          await AsyncStorage.setItem('@decision_history', JSON.stringify(merged));
+        } catch (err) {
+          console.debug('failed to save merged decisions locally', err);
+        }
+
+        // Sincroniza locais que faltavam no remoto
+        (async () => {
+          for (const l of toSyncLocals) {
+            try {
+              await supabaseService.upsertDecision({
+                id: l.id,
+                problem: l.problem,
+                positivePoints: l.positivePoints,
+                negativePoints: l.negativePoints,
+                reflection: l.reflection,
+                overallSentiment: l.overallSentiment,
+                createdAt: new Date().toISOString(),
+              });
+            } catch (err) {
+              console.debug('failed to upsert local decision to remote', err);
+            }
+          }
+        })();
       } catch (error) {
         console.error('Erro ao carregar histórico:', error);
       }
@@ -186,6 +258,23 @@ const DecisionScreen = () => {
       timestamp: new Date().toLocaleString(),
     };
     setHistory([newDecision, ...history]);
+
+    // Tenta sincronizar com Supabase (não bloqueia a UI)
+    (async () => {
+      try {
+        await supabaseService.upsertDecision({
+          id: newDecision.id,
+          problem: newDecision.problem,
+          positivePoints: newDecision.positivePoints,
+          negativePoints: newDecision.negativePoints,
+          reflection: newDecision.reflection,
+          overallSentiment: newDecision.overallSentiment,
+          createdAt: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.debug('upsertDecision error (saved locally):', err);
+      }
+    })();
     setProblem('');
     setPositivePoints([]);
     setNegativePoints([]);

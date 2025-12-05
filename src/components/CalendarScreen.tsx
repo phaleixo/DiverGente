@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchEvents as sbFetchEvents, upsertEvent as sbUpsertEvent, deleteEvent as sbDeleteEvent } from '@/services/supabaseService';
+import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, LocaleConfig, DateData } from 'react-native-calendars';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -28,6 +30,7 @@ LocaleConfig.defaultLocale = 'pt-br';
 const STORAGE_KEY = '@calendar_events';
 
 type Event = {
+  id?: string;
   text: string;
   color: string;
 };
@@ -100,18 +103,99 @@ const CalendarScreen = () => {
     selectedDotColor: themeColors.onPrimary,
   }), [themeColors]);
 
-  // Carregar eventos do armazenamento
+  // Carregar eventos: espera autenticação; se não autenticado, carrega apenas local
+  const { user, loading: authLoading } = useAuth();
+
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const savedEvents = await AsyncStorage.getItem(STORAGE_KEY);
-        if (savedEvents) setEvents(JSON.parse(savedEvents));
+        // Carrega local sempre
+        let local: EventsByDate = {};
+        try {
+          const saved = await AsyncStorage.getItem(STORAGE_KEY);
+          if (saved) local = JSON.parse(saved);
+        } catch (err) {
+          local = {};
+        }
+
+        // Se não autenticado, apenas usa cache local
+        if (!user) {
+          setEvents(local);
+          return;
+        }
+
+        // Usuário autenticado: busca remoto e faz merge
+        let remoteData: any[] = [];
+        try {
+          const { data, error } = await sbFetchEvents();
+          if (!error && Array.isArray(data)) remoteData = data;
+        } catch (err) {
+          remoteData = [];
+        }
+
+        // debug logs removed
+
+        // Parse remoto em EventsByDate
+        const parsedRemote: EventsByDate = {};
+        const remoteById: Record<string, { date: string; row: any }> = {};
+        remoteData.forEach((row: any) => {
+          const date = row.date;
+          if (!parsedRemote[date]) parsedRemote[date] = [];
+          const ev = { id: row.id?.toString(), text: row.text, color: row.color };
+          parsedRemote[date].push(ev);
+          if (ev.id) remoteById[ev.id] = { date, row } as any;
+        });
+
+        // Encontrar eventos locais que não existem remotamente
+        const toSyncLocals: Array<{ id: string; date: string; text: string; color: string }> = [];
+        Object.entries(local).forEach(([date, list]) => {
+          list.forEach((ev) => {
+            if (!ev.id) {
+              // atribui id temporário
+              ev.id = `${Date.now()}-${date}`;
+            }
+            if (!remoteById[ev.id?.toString()]) {
+              toSyncLocals.push({ id: ev.id!.toString(), date, text: ev.text, color: ev.color });
+            }
+          });
+        });
+
+        // Merge: comece com remoto e adicione locais que faltam
+        const merged: EventsByDate = { ...parsedRemote };
+        Object.entries(local).forEach(([date, list]) => {
+          list.forEach((ev) => {
+            if (!merged[date]) merged[date] = [];
+            if (!merged[date].some((r) => r.id === ev.id)) merged[date].push(ev);
+          });
+        });
+
+        setEvents(merged);
+
+        // Persistir localmente o merge
+        try {
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        } catch (err) {
+          // ignore
+        }
+
+        // Sincronizar locais ausentes para o Supabase (fire-and-forget por item)
+        (async () => {
+          for (const ev of toSyncLocals) {
+            try {
+              await sbUpsertEvent({ id: ev.id, date: ev.date, text: ev.text, color: ev.color } as any);
+            } catch (err) {
+              // ignore
+            }
+          }
+        })();
       } catch (e) {
         console.error('Erro ao carregar eventos:', e);
       }
     };
-    loadEvents();
-  }, []);
+
+    // Não tenta carregar até que o Auth tenha terminado de checar sessão
+    if (!authLoading) loadEvents();
+  }, [authLoading, user]);
 
   // Salvar eventos no armazenamento
   useEffect(() => {
@@ -147,10 +231,31 @@ const CalendarScreen = () => {
 
     dates.forEach((date) => {
       if (!updatedEvents[date]) updatedEvents[date] = [];
-      updatedEvents[date].push({ text: eventText, color: eventColor });
+      const id = `${Date.now()}-${date}`;
+      const newEv: Event = { id, text: eventText, color: eventColor };
+      updatedEvents[date].push(newEv);
+      // sincroniza com Supabase e registra resultado para debug
+      (async () => {
+          try {
+          const res = await sbUpsertEvent({ id, date, text: eventText, color: eventColor } as any);
+          if (res?.error) {
+            // error returned from supabase, handled silently
+          }
+        } catch (err) {
+          console.error('sbUpsertEvent threw', err);
+        }
+      })();
     });
 
     setEvents(updatedEvents);
+    // persiste imediatamente localmente para evitar perda caso o componente seja remontado
+    (async () => {
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedEvents));
+      } catch (err) {
+        // ignore
+      }
+    })();
     resetEventForm();
     setEventModalVisible(false);
   };
@@ -172,24 +277,41 @@ const CalendarScreen = () => {
   // Excluir evento
   const deleteEvent = (): void => {
     if (eventToDeleteIndex === null) return;
-    
+
     const updated = { ...events };
     if (updated[selectedDate]) {
+      const ev = updated[selectedDate][eventToDeleteIndex];
       updated[selectedDate].splice(eventToDeleteIndex, 1);
       if (updated[selectedDate].length === 0) delete updated[selectedDate];
+      setEvents(updated);
+      if (ev?.id) {
+        (async () => {
+          try {
+            await sbDeleteEvent(ev.id as string);
+          } catch (err) {
+            console.error('sbDeleteEvent threw', err);
+          }
+        })();
+      }
     }
-    
-    setEvents(updated);
+
     setEventToDeleteIndex(null);
     setConfirmDeleteVisible(false);
   };
 
   // Manipulador de pressionar dia
   const onDayPress = (day: DateData): void => {
-    if (selectedDate === day.dateString) {
+    // Primeiro toque: seleciona a data. Segundo toque (mesma data): abre o modal.
+    if (day.dateString === selectedDate) {
+      // segundo toque no mesmo dia -> abrir modal para inserir evento
+      setStartDate(day.dateString);
+      setEndDate(day.dateString);
       setEventModalVisible(true);
     } else {
+      // primeiro toque em outro dia -> apenas seleciona a data
       setSelectedDate(day.dateString);
+      setStartDate(day.dateString);
+      setEndDate(day.dateString);
     }
   };
 
@@ -228,6 +350,18 @@ const CalendarScreen = () => {
         selectedColor: selectedDate === date ? themeColors.primary : undefined,
       };
     });
+    // Garantir que a data selecionada tenha uma marcação, mesmo sem eventos,
+    // para que o calendário exiba o círculo de seleção.
+    if (!marks[selectedDate]) {
+      marks[selectedDate] = {
+        selected: true,
+        selectedColor: themeColors.primary,
+      };
+    } else {
+      marks[selectedDate].selected = true;
+      marks[selectedDate].selectedColor = themeColors.primary;
+    }
+
     return marks;
   }, [events, selectedDate, themeColors.primary]);
 
@@ -252,18 +386,20 @@ const CalendarScreen = () => {
         <View style={styles.card}>
           <FlatList
             data={events[selectedDate]}
-            keyExtractor={(item, index) => `${item.text}-${index}`}
+            keyExtractor={(item, index) => item.id ? item.id.toString() : `${item.text}-${index}`}
             renderItem={({ item, index }) => {
-              // suaviza a cor do card aplicando alpha para um visual mais agradável
               return (
-                <View style={[styles.eventCard, { backgroundColor: hexToRgba(item.color, isDarkMode ? 0.18 : 0.12) }]}> 
-                  <Text style={[styles.eventText, { color: themeColors.onSurface }]}>• {item.text}</Text>
+                <View style={styles.eventCard}>
+                  <View style={styles.eventRowLeft}>
+                    <MaterialCommunityIcons name="circle" size={12} color={item.color} style={{ marginRight: 10, alignSelf: 'center' }} />
+                    <Text style={[styles.eventText, { color: themeColors.onSurface }]} numberOfLines={1} ellipsizeMode="tail">{item.text}</Text>
+                  </View>
                   <TouchableOpacity onPress={() => confirmDeleteEvent(index)}>
                     <View style={styles.trashOnColor}>
                       <MaterialCommunityIcons
                         name="trash-can-outline"
                         size={16}
-                        color={themeColors.onSurface}
+                        color="#ffffff"
                       />
                     </View>
                   </TouchableOpacity>
@@ -448,7 +584,7 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       width: 10,
     },
     card: {
-      padding: 15,
+      padding: 5,
       marginHorizontal: 10,
       borderRadius: 15,
       backgroundColor: themeColors.surface,
@@ -461,10 +597,18 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       marginVertical: 5,
       paddingVertical: 5,
     },
-    eventText: {
-      fontSize: 18,
-      fontWeight: '500',
+    eventRowLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
       flex: 1,
+      marginRight: 8,
+    },
+    eventText: {
+      fontSize: 16,
+      fontWeight: '600',
+      flex: 1,
+      lineHeight: 20,
+      alignSelf: 'center',
     },
     confirmModalContent: {
       backgroundColor: themeColors.surface,
@@ -516,10 +660,10 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       marginVertical: 6,
     },
     trashOnColor: {
-      backgroundColor: themeColors.surface,
-      borderRadius: 12,
-      width: 28,
-      height: 28,
+      backgroundColor: themeColors.error,
+      borderRadius: 16,
+      width: 30,
+      height: 30,
       alignItems: 'center',
       justifyContent: 'center',
       marginLeft: 10,

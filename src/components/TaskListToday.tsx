@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchTasks as sbFetchTasks } from '@/services/supabaseService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors } from '@/constants/Colors';
@@ -27,16 +28,45 @@ const TaskListToday: React.FC = () => {
   );
 
   const loadTodayTasks = async () => {
-    const data = await AsyncStorage.getItem('tasks');
-    if (data) {
-      const parsedTasks: Task[] = JSON.parse(data);
-      const today = new Date().toISOString().split('T')[0];
+    try {
+      // Tenta carregar do Supabase primeiro
+      try {
+        const { data, error } = await sbFetchTasks();
+        if (!error && Array.isArray(data)) {
+          const mapped = data.map((row: any) => ({
+            id: Number(row.id) || Date.now(),
+            text: row.text,
+            completed: !!row.completed,
+            createdAt: row.created_at || new Date().toLocaleString(),
+            completedAt: row.completed_at || undefined,
+            dueDate: row.due_date || undefined,
+          }));
+          const today = new Date().toISOString().split('T')[0];
+          const todaysTasks = mapped.filter(task => task.dueDate && task.dueDate <= today && !task.completed);
+          setTasksToday(todaysTasks);
+          // também atualiza cache local
+          await AsyncStorage.setItem('tasks', JSON.stringify(mapped));
+          return;
+        }
+      } catch (err) {
+        // supabase falhou — continua com fallback local
+        // console.debug('sbFetchTasks failed', err);
+      }
 
-      const todaysTasks = parsedTasks.filter(task => {
-        return task.dueDate && task.dueDate <= today && !task.completed;
-      });
-      setTasksToday(todaysTasks);
-    } else {
+      const data = await AsyncStorage.getItem('tasks');
+      if (data) {
+        const parsedTasks: Task[] = JSON.parse(data);
+        const today = new Date().toISOString().split('T')[0];
+
+        const todaysTasks = parsedTasks.filter(task => {
+          return task.dueDate && task.dueDate <= today && !task.completed;
+        });
+        setTasksToday(todaysTasks);
+      } else {
+        setTasksToday([]);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar tarefas de hoje:', e);
       setTasksToday([]);
     }
   };

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirmação</title>
+    <meta http-equiv="refresh" content="0;url=/" />
+    <script>
+      // Redireciona para a página adequada com os mesmos query params
+      (function () {
+        const params = window.location.search;
+        const urlParams = new URLSearchParams(params);
+        const type = urlParams.get("type");
+
+        // Se for recuperação de senha -> reset
+        if (type === "recovery") {
+          window.location.href = "./reset.html" + params;
+          return;
+        }
+
+        // Se for confirmação de signup -> confirm
+        if (type === "signup" || type === "invite" || type === "confirmation") {
+          window.location.href = "./confirm.html" + params;
+          return;
+        }
+
+        // Padrão: mostra uma instrução simples ou redireciona para reset
+        if (params && params.length > 1) {
+          // fallback: se tiver token, presume recovery
+          if (urlParams.get("access_token") || urlParams.get("token")) {
+            window.location.href = "./reset.html" + params;
+            return;
+          }
+        }
+
+        // sem parâmetros -> redireciona para a raiz do site
+        // mantém o usuário na pasta confirmacao
+        window.location.href = "./confirm.html";
+      })();
+    </script>
+  </head>
+  <body>
+    Redirecionando...
+  </body>
+</html>

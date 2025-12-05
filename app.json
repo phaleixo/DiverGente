@@ -2,7 +2,7 @@
   "expo": {
     "name": "DiverGente",
     "slug": "DiverGente",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/icon.png",
     "scheme": "myapp",
@@ -17,6 +17,11 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.phaleixo.DiverGente"
+    },
+    "splash": {
+      "image": "./src/assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F0F0F5"
     },
     "web": {
       "bundler": "metro",

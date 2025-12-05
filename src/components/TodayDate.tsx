@@ -8,7 +8,7 @@ type TodayDateProps = {
 function formatToday(shortMonth = true) {
   const now = new Date();
   const formatted = now.toLocaleDateString('pt-BR', {
-    weekday: 'long',
+    weekday: 'short',
     day: 'numeric',
     month: shortMonth ? 'short' : 'long',
   });

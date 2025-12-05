@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Modal, StyleSheet, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchDiaryEntries, upsertDiaryEntry as sbUpsertDiaryEntry, deleteDiaryEntry as sbDeleteDiaryEntry } from '@/services/supabaseService';
 import { Colors } from '@/constants/Colors';
 import Card from '@/components/Card';
 import FAB from '@/components/FAB';
@@ -16,7 +17,7 @@ interface DiaryEntry {
 }
 
 const emotions = [
-  '😊 Felizz', '😢 Tristee', '😡 Irritadoo', '😰 Ansiosoo', '😴 Cansadoo', '😌 Calmoo', '🤔 Pensativoo', '😍 Empolgadoo'
+  '😊 Feliz', '😢 Triste', '😡 Irritado', '😰 Ansioso', '😴 Cansado', '😌 Calmo', '🤔 Pensativo', '😍 Empolgado'
 ];
 
 const Diario: React.FC = () => {
@@ -52,6 +53,11 @@ const Diario: React.FC = () => {
     const updatedEntries = sortEntries([newEntry, ...entries]);
     setEntries(updatedEntries);
     await AsyncStorage.setItem('diaryEntries', JSON.stringify(updatedEntries));
+    try {
+      await sbUpsertDiaryEntry(newEntry as any);
+    } catch (e) {
+      // ignore sync errors
+    }
     setEntryText('');
     setSelectedEmotion('');
     setModalVisible(false);
@@ -61,6 +67,11 @@ const Diario: React.FC = () => {
     const updatedEntries = sortEntries(entries.filter(entry => entry.id !== entryId));
     setEntries(updatedEntries);
     await AsyncStorage.setItem('diaryEntries', JSON.stringify(updatedEntries));
+    try {
+      await sbDeleteDiaryEntry(entryId);
+    } catch (e) {
+      // ignore
+    }
     setConfirmModalVisible(false);
   };
 
@@ -76,6 +87,23 @@ const Diario: React.FC = () => {
   };
 
   const loadEntries = async () => {
+    try {
+      const { data, error } = await fetchDiaryEntries();
+      if (data) {
+        const mapped = data.map((row: any) => ({
+          id: Number(row.id) || Date.now(),
+          text: row.text,
+          createdAt: row.created_at || new Date().toISOString(),
+          emotion: row.emotion || undefined,
+        }));
+        setEntries(sortEntries(mapped));
+        await AsyncStorage.setItem('diaryEntries', JSON.stringify(mapped));
+        return;
+      }
+    } catch (e) {
+      // fallback para local
+    }
+
     const data = await AsyncStorage.getItem('diaryEntries');
     if (data) {
       setEntries(sortEntries(JSON.parse(data)));
@@ -98,7 +126,7 @@ const Diario: React.FC = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }}>
       <View style={styles.container}>
       <Title variant="h3" marginTop={10} marginBottom={10} marginLeft={20}>
-        Controle de Emoções
+        Emoções
       </Title>
       <View style={styles.bodyContainer}>
         <FlatList
@@ -355,7 +383,8 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     width: '100%',
     textAlignVertical: 'top',
     minHeight: 100,
-    
+    maxWidth: '100%',
+    minWidth: '100%',
   },
   confirmButton: {
     backgroundColor: isDarkMode ? Colors.dark.error : Colors.light.error,

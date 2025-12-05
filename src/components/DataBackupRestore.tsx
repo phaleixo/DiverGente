@@ -31,7 +31,7 @@ const DataBackupRestore = () => {
         data[key] = value ? JSON.parse(value) : null;
       }
       const json = JSON.stringify(data, null, 2);
-      const fileUri = FileSystem.cacheDirectory + 'divergente-backup.json';
+      const fileUri = (FileSystem as any).documentDirectory + 'divergente-backup.json';
       await FileSystem.writeAsStringAsync(fileUri, json, { encoding: FileSystem.EncodingType.UTF8 });
       await Sharing.shareAsync(fileUri, { mimeType: 'application/json' });
     } catch (e) {
@@ -65,8 +65,8 @@ const DataBackupRestore = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Backup e Restauração de Dados</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Backup de Dados</Text>
       <Text style={styles.desc}>Exporte ou importe seus dados do calendário, tarefas, diário e decisões usando um arquivo JSON.</Text>
       <View style={styles.section}>
         <Button title={loadingExport ? 'Exportando...' : 'Exportar para arquivo'} onPress={handleExportFile} disabled={loadingExport || loadingImport} color={themeColors.primary} />
@@ -74,7 +74,7 @@ const DataBackupRestore = () => {
       <View style={styles.section}>
         <Button title={loadingImport ? 'Importando...' : 'Importar de arquivo'} onPress={handleImportFile} disabled={loadingExport || loadingImport} color={themeColors.primary} />
       </View>
-    </ScrollView>
+    </View>
   );
 };
 

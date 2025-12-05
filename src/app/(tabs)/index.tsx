@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, useColorScheme, TouchableOpacity, FlatList, ListRenderItem, ListRenderItemInfo } from 'react-native';
-import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, StyleSheet, useColorScheme, FlatList, ListRenderItem } from 'react-native';
 import TaskListToday from '@/components/TaskListToday';
 import CalendarScreen from '@/components/CalendarScreen';
 import TodayDate from '@/components/TodayDate';
 import { Colors } from '@/constants/Colors';
+import ProfileHeader from '@/components/ProfileHeader';
 import { ThemedView } from '@/components/ThemedView';
 import Title from '@/components/Title';
 
@@ -18,16 +17,6 @@ interface HomeItem {
 export default function HomeScreen() {
   const isDarkMode = useColorScheme() === 'dark';
   const styles = useMemo(() => dynamicStyles(isDarkMode), [isDarkMode]);
-  const router = useRouter();
-
-  
-
-  const handlePress = () => {
-    router.push('/Configurar');
-  };
-
-  
-
   const data: HomeItem[] = [
     {
       id: 'calendar',
@@ -61,6 +50,7 @@ export default function HomeScreen() {
             <Title variant="h3" marginTop={20} marginBottom={10}>
               <TodayDate shortMonth />
             </Title>
+            <ProfileHeader />
             
           </View>
         }
