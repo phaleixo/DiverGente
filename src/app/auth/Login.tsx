@@ -167,7 +167,8 @@ const LoginScreen: React.FC = () => {
           }
           try {
             setLoading(true);
-            const res = await sendPasswordResetEmail(email.trim());
+            // Forçar redirect para a página de reset no GitHub Pages
+            const res = await sendPasswordResetEmail(email.trim(), 'https://phaleixo.github.io/DiverGente/reset.html');
             setLoading(false);
             if (res?.error) {
               Alert.alert('Erro', res.error.message || 'Não foi possível enviar o email de redefinição.');

@@ -111,11 +111,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const payload: any = { email, password };
         // supabase v2 supports passing extra user metadata under options.data
         if (fullName) payload.options = { data: { full_name: fullName } };
-        const res = await (auth as any).signUp(payload);
+
+        // prefer explicit redirect for confirmation email
+        const redirectUrl = 'https://phaleixo.github.io/DiverGente/confirm.html';
+        let res: any = null;
+
+        // try common option keys used across supabase client versions
+        try {
+          res = await (auth as any).signUp(payload, { emailRedirectTo: redirectUrl });
+        } catch (e) {
+          try {
+            res = await (auth as any).signUp(payload, { redirectTo: redirectUrl });
+          } catch (e2) {
+            // last resort: call without redirect option
+            res = await (auth as any).signUp(payload);
+          }
+        }
+
         const session = res?.data?.session ?? res?.session ?? null;
         await saveSession(session);
         setUser(session?.user ?? null);
-        return { error: res.error ?? null };
+        return { error: res?.error ?? null };
       }
 
       // fallback genérico (older clients expect `data` field)

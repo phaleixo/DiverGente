@@ -209,17 +209,18 @@ export async function deleteDecision(decisionId: number | string) {
 }
 
 // Enviar email de redefinição de senha
-export async function sendPasswordResetEmail(email: string) {
+export async function sendPasswordResetEmail(email: string, redirectTo?: string) {
   try {
-    // Supabase V2
+    // Supabase V2: suporta passar opção { redirectTo }
     if ((auth as any).resetPasswordForEmail) {
-      const res = await (auth as any).resetPasswordForEmail(email);
+      const opts = redirectTo ? { redirectTo } : undefined;
+      const res = await (auth as any).resetPasswordForEmail(email, opts);
       return res;
     }
 
     // Fallback para clientes antigos
     if ((auth as any).api && (auth as any).api.resetPasswordForEmail) {
-      const res = await (auth as any).api.resetPasswordForEmail(email);
+      const res = await (auth as any).api.resetPasswordForEmail(email, { redirectTo });
       return res;
     }
 
