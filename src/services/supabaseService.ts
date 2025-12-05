@@ -1,4 +1,5 @@
 import supabase, { auth } from '@/config/supabase';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/config/supabase';
 
 type RawTask = {
   id: number | string;
@@ -222,6 +223,25 @@ export async function sendPasswordResetEmail(email: string, redirectTo?: string)
     if ((auth as any).api && (auth as any).api.resetPasswordForEmail) {
       const res = await (auth as any).api.resetPasswordForEmail(email, { redirectTo });
       return res;
+    }
+
+    // fallback: try REST endpoint directly to enforce redirect_to
+    if (redirectTo) {
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ email, redirect_to: redirectTo }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok) return { error: data || new Error('Falha no REST recover') };
+        return { data };
+      } catch (err: any) {
+        return { error: err };
+      }
     }
 
     return { error: new Error('resetPasswordForEmail não suportado pelo cliente Supabase') };

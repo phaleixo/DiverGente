@@ -89,6 +89,10 @@
     <script>
       // CONFIGURE AQUI: substitua pela URL do seu projeto Supabase (ex: https://xxxx.supabase.co)
       const SUPABASE_URL = "https://nzepugdxycwzdyticxpr.supabase.co";
+      // Chave ANON do projeto (necessária para chamadas REST do cliente)
+      // Substitua pela sua SUPABASE_ANON_KEY, ou mantenha a chave de anon se já estiver definida.
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56ZXB1Z2R4eWN3emR5dGljeHByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3MDgyNjQsImV4cCI6MjA4MDI4NDI2NH0.m9c8srIoIih9kL1ZVGXIsH-09sxLS1TSwj8cEeUUhEY";
 
       const info = document.getElementById("info");
       const form = document.getElementById("form");
@@ -140,6 +144,7 @@
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${accessToken}`,
+              apikey: SUPABASE_ANON_KEY,
             },
             body: JSON.stringify({ password: newPassword }),
           });

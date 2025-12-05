@@ -170,6 +170,15 @@ const LoginScreen: React.FC = () => {
             // Forçar redirect para a página de reset no GitHub Pages
             const res = await sendPasswordResetEmail(email.trim(), 'https://phaleixo.github.io/DiverGente/reset.html');
             setLoading(false);
+            // DEBUG TEMPORÁRIO: mostrar resposta do servidor (remover depois)
+            try {
+              const pretty = typeof res === 'string' ? res : JSON.stringify(res, null, 2);
+              Alert.alert('DEBUG: recover response', pretty.substring(0, 4000));
+            } catch (inner) {
+              // se algo falhar ao serializar, cai aqui
+              Alert.alert('DEBUG', 'Resposta recebida (não serializável)');
+            }
+
             if (res?.error) {
               Alert.alert('Erro', res.error.message || 'Não foi possível enviar o email de redefinição.');
             } else {
