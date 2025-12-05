@@ -90,6 +90,14 @@
         getHashParam("token");
       const type = getQueryParam("type") || getHashParam("type");
 
+      // If the link is actually a password recovery link, redirect to reset page
+      if (type === "recovery") {
+        const params = window.location.search || "";
+        const hash = window.location.hash || "";
+        window.location.href = "./reset.html" + params + hash;
+        // stop further execution
+      }
+
       async function verifyToken(token) {
         try {
           const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
