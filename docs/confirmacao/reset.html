@@ -100,10 +100,22 @@
         return params.get(name);
       }
 
-      // Supabase normalmente envia: ?type=recovery&access_token=... (ou token)
+      function getHashParam(name) {
+        // hash pode vir no formato #access_token=...&type=... ou com leading #/
+        const raw = window.location.hash
+          ? window.location.hash.replace(/^#\/?/, "")
+          : "";
+        const params = new URLSearchParams(raw);
+        return params.get(name);
+      }
+
+      // Supabase pode enviar token tanto na query (?access_token=...) quanto no fragment/hash (#access_token=...)
       const accessToken =
-        getQueryParam("access_token") || getQueryParam("token");
-      const type = getQueryParam("type");
+        getQueryParam("access_token") ||
+        getQueryParam("token") ||
+        getHashParam("access_token") ||
+        getHashParam("token");
+      const type = getQueryParam("type") || getHashParam("type");
 
       if (!accessToken) {
         info.textContent =

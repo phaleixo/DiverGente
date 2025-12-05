@@ -8,15 +8,15 @@ Este diretório contém páginas usadas pelo fluxo de autenticação do Supabase
 
 Configuração recomendada no Supabase
 
-1. Em `Authentication → Settings` defina `Site URL` para a pasta base:
+1. Em `Authentication → Settings` defina `Site URL` para a pasta base do GitHub Pages do repositório:
 
-   `https://phaleixo.github.io/confirmacao/`
+   `https://phaleixo.github.io/DiverGente/confirmacao/`
 
 2. Em `Authentication → Settings → Redirect URLs` adicione as URLs completas que podem receber callbacks do Supabase:
 
-   - `https://phaleixo.github.io/confirmacao/`
-   - `https://phaleixo.github.io/confirmacao/reset.html`
-   - `https://phaleixo.github.io/confirmacao/confirm.html`
+   - `https://phaleixo.github.io/DiverGente/confirmacao/`
+   - `https://phaleixo.github.io/DiverGente/confirmacao/reset.html`
+   - `https://phaleixo.github.io/DiverGente/confirmacao/confirm.html`
 
 Como funciona
 

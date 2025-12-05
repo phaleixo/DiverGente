@@ -10,13 +10,13 @@ Como usar
    - Vá em Settings → Pages e escolha `Deploy from a branch` → `branch: master` e `folder: /docs` (ou outra combinação que você prefira).
    - O GitHub Pages publicará a pasta `docs/` em `https://<seu-usuario>.github.io/<seu-repo>/reset-password/`.
 4. No Dashboard do Supabase → Authentication → Settings, configure `Site URL` apontando para a URL pública da página.
-   - Se você deseja usar o endereço que indicou, defina `Site URL` como:
-     `https://phaleixo.github.io/confirmacao/reset.html`
-   - Opcional: adicione essa URL também em `Redirect URLs` se necessário.
-
-Observação: este repositório já inclui um arquivo na mesma rota esperada pelo link que você forneceu: `docs/confirmacao/reset.html`. Depois de publicar `docs/` no GitHub Pages, a URL completa `https://phaleixo.github.io/confirmacao/reset.html` estará disponível (lembre-se de substituir `SUPABASE_URL` dentro do HTML pelo `https://<seu-projeto>.supabase.co`).
-
-Observações de segurança
+   Se você deseja usar o endereço que indicou, defina `Site URL` como:
+   `https://phaleixo.github.io/DiverGente/confirmacao/reset.html`
+   Opcional: adicione essa URL também em `Redirect URLs` se necessário.
+   `https://phaleixo.github.io/DiverGente/confirmacao/reset.html` (para redefinir senha)
+   `https://phaleixo.github.io/DiverGente/confirmacao/confirm.html` (para confirmação de email)
+   `https://phaleixo.github.io/DiverGente/confirmacao/` (opcional — index fará o redirecionamento automático)
+   Observações de segurança
 
 - O token de recuperação é passado na URL. A página usa esse token para chamar o endpoint protegido `/auth/v1/user` do Supabase; não é necessário expor sua `anon key` nesta página.
 - Use HTTPS (GitHub Pages já usa) para evitar vazamento do token.

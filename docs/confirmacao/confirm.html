@@ -75,9 +75,20 @@
         return params.get(name);
       }
 
+      function getHashParam(name) {
+        const raw = window.location.hash
+          ? window.location.hash.replace(/^#\/?/, "")
+          : "";
+        const params = new URLSearchParams(raw);
+        return params.get(name);
+      }
+
       const accessToken =
-        getQueryParam("access_token") || getQueryParam("token");
-      const type = getQueryParam("type");
+        getQueryParam("access_token") ||
+        getQueryParam("token") ||
+        getHashParam("access_token") ||
+        getHashParam("token");
+      const type = getQueryParam("type") || getHashParam("type");
 
       async function verifyToken(token) {
         try {
