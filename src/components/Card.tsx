@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import { useTheme } from '@/contexts/ThemeContext';
 
 
 interface CardProps {
@@ -20,7 +20,9 @@ const Card: React.FC<CardProps> = ({
   contentStyle,
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const styles = dynamicStyles(isDarkMode);
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
+  const styles = useMemo(() => dynamicStyles(theme), [theme]);
 
   const CardComponent = onPress ? TouchableOpacity : View;
 
@@ -41,10 +43,10 @@ const Card: React.FC<CardProps> = ({
   );
 };
 
-const dynamicStyles = (isDarkMode: boolean) =>
+const dynamicStyles = (theme: any) =>
   StyleSheet.create({
     card: {
-      backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+      backgroundColor: theme.surface,
       borderRadius: 12,
       padding: 16,
       marginVertical: 8,

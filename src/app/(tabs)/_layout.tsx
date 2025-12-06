@@ -1,19 +1,20 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { TouchableWithoutFeedback, View, StatusBar,} from 'react-native';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { useTheme } from '@/contexts/ThemeContext';
 
 
 
 
 export default function TabLayout() {
   const isDarkMode = useColorScheme() === 'dark';
-  const theme = isDarkMode ? Colors.dark : Colors.light;
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
   const NoFeedbackTabButton = ({ children, onPress, onLongPress, accessibilityState, accessibilityLabel, testID }: BottomTabBarButtonProps) => (
     <TouchableWithoutFeedback
       onPress={onPress ?? undefined}
@@ -35,8 +36,8 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           animation: 'shift',
-          tabBarActiveTintColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-          tabBarInactiveTintColor: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
+          tabBarActiveTintColor: theme.primary,
+          tabBarInactiveTintColor: theme.outline,
           headerShown: false,
           tabBarStyle: {
             position: 'absolute',
@@ -67,7 +68,7 @@ export default function TabLayout() {
             flex: 1,
             marginTop: 18,
           },
-          tabBarActiveBackgroundColor: 'transparent',
+          tabBarActiveBackgroundColor: isDarkMode ? 'transparent' : theme.primary + '15',
           tabBarInactiveBackgroundColor: 'transparent',
           tabBarLabelStyle: {
             fontSize: 12,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, useColorScheme, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, useColorScheme, Alert, Image, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import Title from '@/components/Title';
@@ -49,13 +49,20 @@ const RegisterScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={require('@/assets/images/icon.png')} style={styles.appIcon} />
-        <Text style={styles.appName}>DiverGente</Text>
-      </View>
-      <Title variant="h2" marginTop={16} marginBottom={8} marginLeft={20}>Registrar</Title>
-      <View style={styles.form}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      style={styles.container}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Image source={require('@/assets/images/icon.png')} style={styles.appIcon} />
+          <Text style={styles.appName}>DiverGente</Text>
+        </View>
+        <Title variant="h2" marginTop={16} marginBottom={8} marginLeft={20}>Registrar</Title>
+        <View style={styles.form}>
         <TextInput
           placeholder="Nome"
           placeholderTextColor={isDarkMode ? Colors.dark.outline : Colors.light.outline}
@@ -95,7 +102,8 @@ const RegisterScreen: React.FC = () => {
           <Text style={styles.linkText}>Já tem conta? Entrar</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -103,6 +111,9 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: 20,
   },
   form: {

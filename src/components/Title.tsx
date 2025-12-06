@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface TitleProps {
   children: React.ReactNode;
@@ -25,11 +25,13 @@ const Title: React.FC<TitleProps> = ({
   color,
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const styles = dynamicStyles(isDarkMode);
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
+  const styles = useMemo(() => dynamicStyles(), []);
 
   const getColor = () => {
     if (color) return color;
-    return isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface;
+    return theme.onSurface;
   };
 
   return (
@@ -51,7 +53,7 @@ const Title: React.FC<TitleProps> = ({
   );
 };
 
-const dynamicStyles = (isDarkMode: boolean) =>
+const dynamicStyles = () =>
   StyleSheet.create({
     h1: {
       fontSize: 32,

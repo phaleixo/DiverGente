@@ -7,6 +7,7 @@ import { Colors } from '@/constants/Colors';
 import ProfileHeader from '@/components/ProfileHeader';
 import { ThemedView } from '@/components/ThemedView';
 import Title from '@/components/Title';
+import { useTheme } from '@/contexts/ThemeContext';
 
 
 interface HomeItem {
@@ -16,7 +17,9 @@ interface HomeItem {
 
 export default function HomeScreen() {
   const isDarkMode = useColorScheme() === 'dark';
-  const styles = useMemo(() => dynamicStyles(isDarkMode), [isDarkMode]);
+  const { colors } = useTheme();
+  const theme = isDarkMode ? colors.dark : colors.light;
+  const styles = useMemo(() => dynamicStyles(isDarkMode, theme), [isDarkMode, theme]);
   const data: HomeItem[] = [
     {
       id: 'calendar',
@@ -60,11 +63,11 @@ export default function HomeScreen() {
   );
 }
 
-const dynamicStyles = (isDarkMode: boolean) =>
+const dynamicStyles = (isDarkMode: boolean, theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
+      backgroundColor: theme.background,
     },
     header: {
       flexDirection: 'row',
@@ -78,14 +81,14 @@ const dynamicStyles = (isDarkMode: boolean) =>
       padding: 10,
       marginVertical: 10,
       borderRadius: 15,
-      backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+      backgroundColor: theme.surface,
       marginHorizontal: 10,
 
     },
     help: {
       padding: 20,
       borderRadius: 15,
-      backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+      backgroundColor: theme.surface,
       marginHorizontal: 10,
       marginVertical: 10,
       minHeight: 140,
@@ -95,12 +98,12 @@ const dynamicStyles = (isDarkMode: boolean) =>
     cardText: {
       fontSize: 18,
       fontWeight: '600',
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginBottom: 5,
     },
     cardSubtext: {
       fontSize: 14,
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginTop: 10,
       alignItems: 'center',
     },

@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface FABProps {
   onPress: () => void;
@@ -20,7 +20,9 @@ const FAB: React.FC<FABProps> = ({
   style,
 }) => {
   const isDarkMode = useColorScheme() === 'dark';
-  const styles = dynamicStyles(isDarkMode, size);
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
+  const styles = useMemo(() => dynamicStyles(theme, size), [theme, size]);
 
   return (
     <TouchableOpacity
@@ -28,12 +30,12 @@ const FAB: React.FC<FABProps> = ({
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Feather name={icon} size={28} color={iconColor || (isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary)} />
+      <Feather name={icon} size={28} color={iconColor || theme.onPrimary} />
     </TouchableOpacity>
   );
 };
 
-const dynamicStyles = (isDarkMode: boolean, size: number) =>
+const dynamicStyles = (theme: any, size: number) =>
   StyleSheet.create({
     fab: {
       position: 'absolute',
@@ -42,11 +44,11 @@ const dynamicStyles = (isDarkMode: boolean, size: number) =>
       width: size,
       height: size,
       borderRadius: 15,
-      backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+      backgroundColor: theme.primary,
       justifyContent: 'center',
       alignItems: 'center',
       elevation: 6,
-      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+      shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 3 },
       shadowOpacity: 0.3,
       shadowRadius: 6,

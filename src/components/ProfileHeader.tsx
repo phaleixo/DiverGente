@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, Alert, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const STORAGE_PREFIX = '@profile_image_';
 
@@ -19,7 +20,10 @@ interface ProfileHeaderProps {
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left', containerStyle, nameStyle, imageStyle }) => {
   const { user } = useAuth();
-  const isDarkMode = useColorScheme() === 'dark';
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
   const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
@@ -98,7 +102,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
                 {
                   marginRight: 8,
                   marginTop: 0,
-                  color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+                  color: theme.onSurface,
                   fontWeight: '900',
                   fontSize: Math.max(14, Math.round(avatarSize / 2.6)),
                 },
@@ -110,7 +114,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
             {imageUri ? (
               <Image source={{ uri: imageUri }} style={[{ width: avatarSize, height: avatarSize, borderRadius }, imageStyle]} />
             ) : (
-              <MaterialCommunityIcons name="account" size={Math.round(avatarSize)} color={isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface} />
+              <MaterialCommunityIcons name="account" size={Math.round(avatarSize)} color={theme.onSurface} />
             )}
           </>
         ) : (
@@ -119,14 +123,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
             {imageUri ? (
               <Image source={{ uri: imageUri }} style={[{ width: avatarSize, height: avatarSize, borderRadius }, imageStyle]} />
             ) : (
-              <MaterialCommunityIcons name="account" size={Math.round(avatarSize)} color={isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface} />
+              <MaterialCommunityIcons name="account" size={Math.round(avatarSize)} color={theme.onSurface} />
             )}
             <Text
               style={[
                 {
                   marginLeft: isRow ? 8 : 0,
                   marginTop: isRow ? 0 : 8,
-                  color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+                  color: theme.onSurface,
                   fontWeight: '600',
                   fontSize: Math.max(12, Math.round(avatarSize / 2.6)),
                 },

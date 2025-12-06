@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, useColorScheme, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, useColorScheme, Alert, Image, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import Title from '@/components/Title';
 import { useAuth } from '@/contexts/AuthContext';
-import supabase, { auth } from '@/config/supabase';
 import { sendPasswordResetEmail } from '@/services/supabaseService';
 
 const LoginScreen: React.FC = () => {
@@ -124,13 +123,19 @@ const LoginScreen: React.FC = () => {
 
   
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={require('@/assets/images/icon.png')} style={styles.appIcon} />
-        <Text style={styles.appName}>DiverGente</Text>
-      </View>
-      <Title variant="h2" marginTop={16} marginBottom={8} marginLeft={20}>Entrar</Title>
-      <View style={styles.form}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      style={styles.container}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Image source={require('@/assets/images/icon.png')} style={styles.appIcon} />
+          <Text style={styles.appName}>DiverGente</Text>
+        </View>
+        <View style={styles.form}>
         <TextInput
           placeholder="Email"
           placeholderTextColor={isDarkMode ? Colors.dark.outline : Colors.light.outline}
@@ -170,14 +175,6 @@ const LoginScreen: React.FC = () => {
             // Forçar redirect para a página de reset no GitHub Pages
             const res = await sendPasswordResetEmail(email.trim(), 'https://phaleixo.github.io/DiverGente/reset.html');
             setLoading(false);
-            // DEBUG TEMPORÁRIO: mostrar resposta do servidor (remover depois)
-            try {
-              const pretty = typeof res === 'string' ? res : JSON.stringify(res, null, 2);
-              Alert.alert('DEBUG: recover response', pretty.substring(0, 4000));
-            } catch (inner) {
-              // se algo falhar ao serializar, cai aqui
-              Alert.alert('DEBUG', 'Resposta recebida (não serializável)');
-            }
 
             if (res?.error) {
               Alert.alert('Erro', res.error.message || 'Não foi possível enviar o email de redefinição.');
@@ -192,7 +189,8 @@ const LoginScreen: React.FC = () => {
           <Text style={styles.linkText}>Esqueci minha senha</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -200,6 +198,9 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: 20,
   },
   form: {

@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TouchableOpacity, Text, Alert } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const SignOutButton: React.FC = () => {
   const { signOut } = useAuth();
   const isDarkMode = useColorScheme() === 'dark';
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
 
   const confirmLogout = () => {
     Alert.alert('Confirmar', 'Deseja sair?', [
@@ -16,8 +18,8 @@ const SignOutButton: React.FC = () => {
   };
 
   return (
-    <TouchableOpacity onPress={confirmLogout} style={{ alignItems: 'center', marginTop: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline, backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface }} activeOpacity={0.8}>
-      <Text style={{ color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface, fontWeight: '600' }}>Sair</Text>
+    <TouchableOpacity onPress={confirmLogout} style={{ alignItems: 'center', marginTop: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: theme.outline, backgroundColor: theme.surface }} activeOpacity={0.8}>
+      <Text style={{ color: theme.onSurface, fontWeight: '600' }}>Sair</Text>
     </TouchableOpacity>
   );
 };

@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Modal, StyleSheet, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchDiaryEntries, upsertDiaryEntry as sbUpsertDiaryEntry, deleteDiaryEntry as sbDeleteDiaryEntry } from '@/services/supabaseService';
-import { Colors } from '@/constants/Colors';
 import Card from '@/components/Card';
 import FAB from '@/components/FAB';
 import Title from '@/components/Title';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface DiaryEntry {
   id: number;
@@ -30,7 +30,9 @@ const Diario: React.FC = () => {
   const animation = useRef(new Animated.Value(1)).current;
 
   const isDarkMode = useColorScheme() === 'dark';
-  const styles = dynamicStyles(isDarkMode);
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
+  const styles = useMemo(() => dynamicStyles(theme), [theme]);
 
   useEffect(() => {
     loadEntries();
@@ -123,7 +125,7 @@ const Diario: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={styles.container}>
       <Title variant="h3" marginTop={10} marginBottom={10} marginLeft={20}>
         Emoções
@@ -156,7 +158,7 @@ const Diario: React.FC = () => {
                       <MaterialCommunityIcons
                         name="trash-can-outline"
                         size={24}
-                        color={isDarkMode ? Colors.dark.error : Colors.light.error}
+                        color={theme.error}
                       />
                     </TouchableOpacity>
                   </View>
@@ -208,7 +210,7 @@ const Diario: React.FC = () => {
                         <Text
                           style={[
                             styles.emotionName,
-                            isSelected && { color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary }
+                            isSelected && { color: theme.onPrimary }
                           ]}
                         >
                           {label}
@@ -219,7 +221,7 @@ const Diario: React.FC = () => {
                 </View>
                 <TextInput
                   placeholder="Escreva sobre seu dia..."
-                  placeholderTextColor={isDarkMode ? Colors.dark.outline : Colors.light.outline}
+                  placeholderTextColor={theme.outline}
                   value={entryText}
                   onChangeText={setEntryText}
                   style={styles.input}
@@ -269,10 +271,10 @@ const Diario: React.FC = () => {
   );
 };
 
-const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
+const dynamicStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
+    backgroundColor: theme.background,
     padding: 2,
     marginTop: 10,
     
@@ -288,7 +290,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   entryText: {
     fontSize: 16,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     marginBottom: 5,
     lineHeight: 24,
   },
@@ -297,17 +299,17 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   entryDate: {
     fontSize: 12,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     marginTop: 2,
   },
   emotionText: {
     fontSize: 18,
     marginBottom: 8,
-    color: isDarkMode ? Colors.dark.primary : Colors.light.onSurface,
+    color: theme.primary,
   },
   modalBackground: {
     flex: 1,
-    backgroundColor: isDarkMode ? Colors.dark.scrim : Colors.light.scrim,
+    backgroundColor: theme.scrim,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -318,11 +320,11 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    backgroundColor: theme.surface,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
-    shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+    shadowColor: theme.shadow,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -337,7 +339,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     textAlign: 'left',
   },
   emotionsContainer: {
@@ -347,25 +349,25 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     marginBottom: 20,
   },
   emotionButton: {
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    backgroundColor: theme.surface,
     paddingVertical: 2,
     paddingHorizontal: 2,
     borderRadius: 20,
     margin: 4,
     borderWidth: 1,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    borderColor: theme.outline,
     flexDirection: 'row',
     alignItems: 'center',
     minWidth: 100,
     overflow: 'visible',
   },
   selectedEmotionButton: {
-    backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-    borderColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
   },
   emotionName: {
     fontSize: 14,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     flexShrink: 0,
   },
   emotionEmoji: {
@@ -374,12 +376,12 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    borderColor: theme.outline,
     padding: 12,
     borderRadius: 10,
     marginBottom: 14,
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    backgroundColor: theme.surface,
+    color: theme.onSurface,
     width: '100%',
     textAlignVertical: 'top',
     minHeight: 100,
@@ -387,7 +389,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     minWidth: '100%',
   },
   confirmButton: {
-    backgroundColor: isDarkMode ? Colors.dark.error : Colors.light.error,
+    backgroundColor: theme.error,
     padding: 12,
     borderRadius: 8,
     marginHorizontal: 10,
@@ -395,12 +397,12 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     alignItems: 'center',
   },
   confirmButtonText: {
-    color: isDarkMode ? Colors.dark.onError : Colors.light.onError,
+    color: theme.onError,
     fontSize: 16,
     fontWeight: 'bold',
   },
   cancelButton: {
-    backgroundColor: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
+    backgroundColor: theme.secondary,
     padding: 12,
     borderRadius: 8,
     marginHorizontal: 10,
@@ -408,7 +410,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
+    color: theme.onSecondary,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -416,10 +418,10 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     fontSize: 18,
     marginBottom: 20,
     textAlign: 'center',
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
   },
   modalAddButton: {
-    backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+    backgroundColor: theme.primary,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 10,
@@ -428,7 +430,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     flex: 1,
   },
   modalAddButtonText: {
-    color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary,
+    color: theme.onPrimary,
     fontSize: 18,
   },
   modalButtonRow: {
@@ -439,7 +441,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     gap: 10,
   },
   modalCancelButton: {
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    backgroundColor: theme.surface,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 10,
@@ -447,10 +449,10 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     justifyContent: 'center',
     flex: 1,
     borderWidth: 1,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    borderColor: theme.outline,
   },
   modalCancelButtonText: {
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     textAlign: 'center',
     fontSize: 16,
   },
@@ -473,8 +475,8 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   deleteButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    backgroundColor: theme.onSecondary,
+    borderColor: theme.outline,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',

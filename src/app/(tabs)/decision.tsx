@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import supabaseService from '@/services/supabaseService';
-import { Colors } from '@/constants/Colors';
 import Title from '@/components/Title';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Point {
   id: string;
@@ -34,7 +34,9 @@ const DecisionScreen = () => {
 
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
-  const styles = useMemo(() => createStyles(isDarkMode), [isDarkMode]);
+  const { colors } = useTheme();
+  const theme = isDarkMode ? colors.dark : colors.light;
+  const styles = useMemo(() => createStyles(isDarkMode, theme), [isDarkMode, theme]);
 
   // Carregar o histórico salvo ao iniciar
   useEffect(() => {
@@ -148,7 +150,7 @@ const DecisionScreen = () => {
 
   const renderStar = (rating: number, index: number, onPress: (newRating: number) => void) => {
     const isSelected = index < rating;
-    const starColor = isSelected ? '#FFD700' : (isDarkMode ? Colors.dark.outline : Colors.light.outline);
+    const starColor = isSelected ? '#FFD700' : theme.outline;
     return (
       <TouchableOpacity key={index} onPress={() => onPress(index + 1)}>
         <MaterialCommunityIcons
@@ -167,8 +169,8 @@ const DecisionScreen = () => {
         style={[
           styles.addInput,
           {
-            backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
-            color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+            backgroundColor: theme.surface,
+            color: theme.onSurface,
           },
         ]}
         value={pointType === 'positive' ? newPositivePoint : newNegativePoint}
@@ -176,13 +178,13 @@ const DecisionScreen = () => {
           pointType === 'positive' ? setNewPositivePoint(text) : setNewNegativePoint(text)
         }
         placeholder={`Adicionar ponto ${pointType === 'positive' ? 'positivo' : 'negativo'}`}
-        placeholderTextColor={isDarkMode ? Colors.dark.outline : Colors.light.outline}
+        placeholderTextColor={theme.outline}
       />
       <TouchableOpacity
         style={[
           styles.addButton,
           {
-            backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+            backgroundColor: theme.primary,
           },
         ]}
         onPress={() =>
@@ -192,7 +194,7 @@ const DecisionScreen = () => {
         <MaterialCommunityIcons
           name={pointType === 'positive' ? 'plus' : 'minus'}
           size={24}
-          color={isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary}
+          color={theme.onPrimary}
         />
       </TouchableOpacity>
     </View>
@@ -306,7 +308,7 @@ const DecisionScreen = () => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={styles.container}>
         <View>
 
@@ -329,7 +331,7 @@ const DecisionScreen = () => {
                 value={problem}
                 onChangeText={setProblem}
                 placeholder="Descreva o problema"
-                placeholderTextColor={isDarkMode ? Colors.dark.outline : Colors.light.outline}
+                placeholderTextColor={theme.outline}
               />
 
               <Text style={styles.sectionTitle}>Pontos Positivos</Text>
@@ -349,7 +351,7 @@ const DecisionScreen = () => {
                 value={reflection}
                 onChangeText={setReflection}
                 placeholder="Reflexão final sobre a decisão..."
-                placeholderTextColor={isDarkMode ? Colors.dark.outline : Colors.light.outline}
+                placeholderTextColor={theme.outline}
               />
 
               <TouchableOpacity style={styles.saveButton} onPress={saveDecision}>
@@ -367,18 +369,18 @@ const DecisionScreen = () => {
   );
 };
 
-const createStyles = (isDarkMode: boolean) =>
+const createStyles = (isDarkMode: boolean, theme: any) =>
   StyleSheet.create({
     container: {
       marginTop: 10,
       padding: 12,
-      backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
+      backgroundColor: theme.background,
       paddingBottom: 80,
       flex: 1,
     },
     label: {
       fontSize: 17,
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginBottom: 7,
       fontWeight: '500',
     },
@@ -387,9 +389,9 @@ const createStyles = (isDarkMode: boolean) =>
       padding: 18,
       borderRadius: 14,
       marginBottom: 28,
-      backgroundColor: isDarkMode ? Colors.dark.onSurface : Colors.light.surface,
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+      backgroundColor: theme.surface,
+      color: theme.onSurface,
+      shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.04,
       shadowRadius: 2,
@@ -398,7 +400,7 @@ const createStyles = (isDarkMode: boolean) =>
     sectionTitle: {
       fontSize: 22,
       fontWeight: '600',
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginTop: 40,
       marginBottom: 18,
       letterSpacing: 0.2,
@@ -415,7 +417,7 @@ const createStyles = (isDarkMode: boolean) =>
       padding: 16,
       borderRadius: 12,
       // backgroundColor e color agora são definidos inline para garantir branco/light
-      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+      shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.04,
       shadowRadius: 2,
@@ -432,19 +434,19 @@ const createStyles = (isDarkMode: boolean) =>
       // backgroundColor agora é definido inline para garantir primary
     },
     pointCard: {
-      backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+      backgroundColor: theme.surface,
       padding: 18,
       marginBottom: 14,
       borderRadius: 16,
       elevation: 0,
-      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+      shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.06,
       shadowRadius: 4,
     },
     pointText: {
       fontSize: 17,
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       fontWeight: '500',
     },
     ratingContainer: {
@@ -457,7 +459,7 @@ const createStyles = (isDarkMode: boolean) =>
     sentimentText: {
       fontSize: 17,
       fontStyle: 'italic',
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginTop: 22,
       marginBottom: 30,
       textAlign: 'center',
@@ -467,17 +469,17 @@ const createStyles = (isDarkMode: boolean) =>
       borderWidth: 0,
       padding: 18,
       borderRadius: 14,
-      backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      backgroundColor: theme.surface,
+      color: theme.onSurface,
       marginBottom: 30,
-      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+      shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.04,
       shadowRadius: 2,
       fontSize: 16,
     },
     saveButton: {
-      backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+      backgroundColor: theme.primary,
       paddingVertical: 18,
       paddingHorizontal: 32,
       borderRadius: 16,
@@ -486,24 +488,24 @@ const createStyles = (isDarkMode: boolean) =>
       marginBottom: 40,
       alignSelf: 'center',
       minWidth: 220,
-      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+      shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 3 },
       shadowOpacity: 0.10,
       shadowRadius: 6,
     },
     saveButtonText: {
-      color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary,
+      color: theme.onPrimary,
       fontWeight: 'bold',
       fontSize: 18,
       letterSpacing: 0.5,
     },
     historyCard: {
-      backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+      backgroundColor: theme.surface,
       padding: 20,
       marginVertical: 18,
       borderRadius: 18,
       elevation: 0,
-      shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+      shadowColor: theme.shadow,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 4,
@@ -511,45 +513,45 @@ const createStyles = (isDarkMode: boolean) =>
     historyProblem: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginBottom: 6,
     },
     historySentiment: {
       fontSize: 17,
-      color: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+      color: theme.primary,
       marginBottom: 10,
       fontWeight: '500',
     },
     historyPointsTitle: {
       fontSize: 16,
       fontWeight: 'bold',
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginTop: 18,
       marginBottom: 6,
     },
     historyPointItem: {
       fontSize: 15,
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginLeft: 10,
       marginBottom: 3,
     },
     historyReflection: {
       fontSize: 15,
       fontStyle: 'italic',
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginTop: 12,
       marginBottom: 6,
     },
     historyTimestamp: {
       fontSize: 13,
-      color: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+      color: theme.surface,
       marginTop: 10,
       textAlign: 'right',
     },
     emptyListText: {
       textAlign: 'center',
       fontSize: 19,
-      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      color: theme.onSurface,
       marginTop: 40,
       fontWeight: '400',
     },

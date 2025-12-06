@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, LocaleConfig, DateData } from 'react-native-calendars';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Configuração de localização
 LocaleConfig.locales['pt-br'] = {
@@ -53,9 +54,10 @@ const CalendarScreen = () => {
   // Configuração de tema
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
-  const themeColors = isDarkMode ? Colors.dark : Colors.light;
-  const styles = useMemo(() => dynamicStyles(isDarkMode, themeColors), [isDarkMode, themeColors]);
-  const calendarKey = useMemo(() => Date.now().toString() + (isDarkMode ? 'dark' : 'light'), [isDarkMode]);
+  const { colors, currentTheme } = useTheme();
+  const themeColors = isDarkMode ? colors.dark : colors.light;
+  const styles = useMemo(() => dynamicStyles(isDarkMode, themeColors), [isDarkMode, themeColors, colors]);
+  const calendarKey = useMemo(() => currentTheme + '-' + (isDarkMode ? 'dark' : 'light'), [currentTheme, isDarkMode]);
 
   // Estados do calendário
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -101,7 +103,7 @@ const CalendarScreen = () => {
     textDisabledColor: themeColors.onSurfaceDisabled,
     dotColor: themeColors.primary,
     selectedDotColor: themeColors.onPrimary,
-  }), [themeColors]);
+  }), [themeColors, colors]);
 
   // Carregar eventos: espera autenticação; se não autenticado, carrega apenas local
   const { user, loading: authLoading } = useAuth();

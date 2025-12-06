@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Modal, StyleSheet, useColorScheme, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchTasks, upsertTask as sbUpsertTask, deleteTask as sbDeleteTask } from '@/services/supabaseService';
 import { Calendar } from 'react-native-calendars';
-import { Colors } from '@/constants/Colors';
 import Card from '@/components/Card';
 import FAB from '@/components/FAB';
 import Title from '@/components/Title';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Task {
   id: number;
@@ -31,7 +31,9 @@ const TaskList: React.FC = () => {
   const [filter, setFilter] = useState<'todas' | 'naoConcluidas' | 'concluidas'>('todas');
 
   const isDarkMode = useColorScheme() === 'dark';
-  const styles = dynamicStyles(isDarkMode);
+  const { colors } = useTheme();
+  const theme = isDarkMode ? colors.dark : colors.light;
+  const styles = useMemo(() => dynamicStyles(isDarkMode, theme), [isDarkMode, theme, colors]);
 
   useEffect(() => {
     loadTasks();
@@ -172,7 +174,7 @@ const TaskList: React.FC = () => {
   });
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={styles.container}>
         <Title variant="h3" marginTop={10} marginBottom={10} marginLeft={20}>
           Minhas Tarefas
@@ -255,9 +257,9 @@ const TaskList: React.FC = () => {
                       style={[
                         styles.completeButton,
                         { 
-                          backgroundColor: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
+                          backgroundColor: theme.onSecondary,
                           marginBottom: 8,
-                          borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+                          borderColor: theme.outline,
                           borderWidth: 1,
                         }
                       ]}
@@ -265,7 +267,7 @@ const TaskList: React.FC = () => {
                       <MaterialCommunityIcons
                         name={item.completed ? 'check-all' : 'check'}
                         size={24}
-                        color={isDarkMode ? Colors.dark.sucess : Colors.light.sucess}
+                        color={theme.sucess}
                       />
                     </TouchableOpacity>
                     <TouchableOpacity 
@@ -275,7 +277,7 @@ const TaskList: React.FC = () => {
                       <MaterialCommunityIcons 
                         name="trash-can-outline" 
                         size={24} 
-                        color={isDarkMode ? Colors.dark.error : Colors.light.error} 
+                        color={theme.error} 
                       />
                     </TouchableOpacity>
                   </View>
@@ -306,7 +308,7 @@ const TaskList: React.FC = () => {
                 <Text style={styles.modalTitle}>Adicionar nova tarefa</Text>
                 <TextInput
                   placeholder="Digite o título da tarefa"
-                  placeholderTextColor={isDarkMode ? Colors.dark.outline : Colors.light.outline}
+                  placeholderTextColor={theme.outline}
                   value={taskText}
                   onChangeText={setTaskText}
                   style={styles.input}
@@ -320,20 +322,20 @@ const TaskList: React.FC = () => {
 
                 <Calendar
                   onDayPress={handleDayPress}
-                  markedDates={dueDate ? { [dueDate]: { selected: true, selectedColor: isDarkMode ? Colors.dark.primary : Colors.light.primary } } : {}}
+                  markedDates={dueDate ? { [dueDate]: { selected: true, selectedColor: theme.primary } } : {}}
                   theme={{
-                    backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
-                    calendarBackground: isDarkMode ? Colors.dark.background : Colors.light.background,
-                    textSectionTitleColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-                    selectedDayBackgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-                    selectedDayTextColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-                    todayTextColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-                    dayTextColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-                    textDisabledColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-                    dotColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-                    selectedDotColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
-                    arrowColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-                    monthTextColor: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+                    backgroundColor: theme.background,
+                    calendarBackground: theme.background,
+                    textSectionTitleColor: theme.onSurface,
+                    selectedDayBackgroundColor: theme.primary,
+                    selectedDayTextColor: theme.onSurface,
+                    todayTextColor: theme.primary,
+                    dayTextColor: theme.onSurface,
+                    textDisabledColor: theme.onSurface,
+                    dotColor: theme.primary,
+                    selectedDotColor: theme.onSurface,
+                    arrowColor: theme.primary,
+                    monthTextColor: theme.onSurface,
                     textDayFontWeight: '400',
                     textMonthFontWeight: '600',
                     textDayHeaderFontWeight: '400',
@@ -400,10 +402,10 @@ const TaskList: React.FC = () => {
   );
 };
 
-const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
+const dynamicStyles = (isDarkMode: boolean, theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: isDarkMode ? Colors.dark.background : Colors.light.background,
+    backgroundColor: theme.background,
     padding: 2,
     marginTop: 10,
   },
@@ -433,7 +435,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   taskText: {
     fontSize: 16,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     marginBottom: 5,
   },
   taskTitle: {
@@ -441,11 +443,11 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   completedTaskText: {
     textDecorationLine: 'line-through',
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
   },
   taskDate: {
     fontSize: 12,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     marginTop: 2,
   },
   completeButton: {
@@ -456,15 +458,15 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     justifyContent: 'center',
   },
   completedButton: {
-    backgroundColor: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
+    backgroundColor: theme.secondary,
   },
   completeButtonText: {
-    color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary,
+    color: theme.onPrimary,
     fontSize: 14,
   },
   deleteButton: {
-    backgroundColor: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    backgroundColor: theme.onSecondary,
+    borderColor: theme.outline,
     borderWidth: 1,
     padding: 8,
     borderRadius: 10,
@@ -474,7 +476,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   modalBackground: {
     flex: 1,
-    backgroundColor: isDarkMode ? Colors.dark.scrim : Colors.light.scrim,
+    backgroundColor: theme.scrim,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -485,11 +487,11 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    backgroundColor: theme.surface,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
-    shadowColor: isDarkMode ? Colors.dark.shadow : Colors.light.shadow,
+    shadowColor: theme.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -501,17 +503,17 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    borderColor: theme.outline,
     padding: 12,
     borderRadius: 10,
     marginBottom: 14,
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    backgroundColor: theme.surface,
+    color: theme.onSurface,
     maxWidth: '100%',
     minWidth: '100%',
   },
   dueDateButton: {
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    backgroundColor: theme.surface,
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
@@ -519,11 +521,11 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     alignItems: 'center',
   },
   dueDateButtonText: {
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     fontSize: 16,
   },
   confirmButton: {
-    backgroundColor: isDarkMode ? Colors.dark.error : Colors.light.error,
+    backgroundColor: theme.error,
     padding: 12,
     borderRadius: 8,
     marginHorizontal: 10,
@@ -531,12 +533,12 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     alignItems: 'center',
   },
   confirmButtonText: {
-    color: isDarkMode ? Colors.dark.onError : Colors.light.onError,
+    color: theme.onError,
     fontSize: 16,
     fontWeight: 'bold',
   },
   cancelButton: {
-    backgroundColor: isDarkMode ? Colors.dark.secondary : Colors.light.secondary,
+    backgroundColor: theme.secondary,
     padding: 12,
     borderRadius: 8,
     marginHorizontal: 10,
@@ -544,7 +546,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
+    color: theme.onSecondary,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -552,10 +554,10 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     fontSize: 18,
     marginBottom: 20,
     textAlign: 'center',
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
   },
   modalAddButton: {
-    backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+    backgroundColor: theme.primary,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 10,
@@ -565,12 +567,12 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     marginRight: 8,
   },
   modalAddButtonText: {
-    color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary,
+    color: theme.onPrimary,
     fontSize: 16,
     fontWeight: 'bold',
   },
   modalCancelButton: {
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    backgroundColor: theme.surface,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 10,
@@ -579,10 +581,10 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     borderWidth: 1,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    borderColor: theme.outline,
   },
   modalCancelButtonText: {
-    color: isDarkMode ? Colors.dark.onSecondary : Colors.light.onSecondary,
+    color: theme.onSecondary,
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -597,7 +599,7 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     textAlign: 'left',
   },
   modalButtonRow: {
@@ -616,20 +618,20 @@ const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    borderColor: theme.outline,
+    backgroundColor: theme.surface,
     marginHorizontal: 4,
   },
   chipSelected: {
-    backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
-    borderColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
   },
   chipText: {
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    color: theme.onSurface,
     fontWeight: 'bold',
   },
   chipTextSelected: {
-    color: isDarkMode ? Colors.dark.onPrimary : Colors.light.onPrimary,
+    color: theme.onPrimary,
   },
 });
 

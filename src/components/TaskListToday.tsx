@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchTasks as sbFetchTasks } from '@/services/supabaseService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Colors } from '@/constants/Colors';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Task {
   id: number;
@@ -18,8 +18,10 @@ interface Task {
 const TaskListToday: React.FC = () => {
   const [tasksToday, setTasksToday] = useState<Task[]>([]);
   const isDarkMode = useColorScheme() === 'dark';
+  const { colors } = useTheme();
+  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
   const router = useRouter();
-  const styles = dynamicStyles(isDarkMode);
+  const styles = useMemo(() => dynamicStyles(theme), [theme]);
 
   useFocusEffect(
     useCallback(() => {
@@ -82,7 +84,7 @@ const TaskListToday: React.FC = () => {
           <MaterialCommunityIcons
             name="calendar-month"
             size={20}
-            color={isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface}
+            color={theme.onSurface}
           />
           <Text style={styles.headerText}>Tarefas de Hoje</Text>
           <View style={styles.taskCountCircle}>
@@ -94,36 +96,39 @@ const TaskListToday: React.FC = () => {
   );
 };
 
-const dynamicStyles = (isDarkMode: boolean) => StyleSheet.create({
+const dynamicStyles = (theme: any) => StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: isDarkMode ? Colors.dark.surface : Colors.light.surface,
+    backgroundColor: theme.surface,
+    borderRadius: 12,
+    padding: 4,
+    marginTop: 8,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 7,
-    marginTop: 7,
-    paddingHorizontal: 5,
+    marginBottom: 10,
+    marginTop: 5,
+    paddingHorizontal: 2,
   },
   headerText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    fontWeight: '700',
+    color: theme.onSurface,
   },
   taskCountCircle: {
-    backgroundColor: isDarkMode ? Colors.dark.primary : Colors.light.primary,
+    backgroundColor: theme.primary,
     borderRadius: 15,
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     justifyContent: 'center',
     alignItems: 'center',
   },
   taskCountText: {
-    color: isDarkMode ? Colors.light.onPrimary : Colors.light.onPrimary,
+    color: theme.onPrimary,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
 });
 
