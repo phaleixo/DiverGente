@@ -59,7 +59,7 @@ const RegisterScreen: React.FC = () => {
       >
         <View style={styles.header}>
           <Image source={require('@/assets/images/icon.png')} style={styles.appIcon} />
-          <Text style={styles.appName}>DiverGente</Text>
+          <Text style={styles.appName}>DiverGente {'  '}</Text>
         </View>
         <Title variant="h2" marginTop={16} marginBottom={8} marginLeft={20}>Registrar</Title>
         <View style={styles.form}>
@@ -96,10 +96,10 @@ const RegisterScreen: React.FC = () => {
           secureTextEntry
         />
         <TouchableOpacity onPress={handleSignUp} style={styles.button} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? 'Registrando...' : 'Registrar'}</Text>
+          <Text style={styles.buttonText}>{loading ? 'Registrando...' : ' Registrar  '}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push('/auth/Login')} style={styles.linkButton}>
-          <Text style={styles.linkText}>Já tem conta? Entrar</Text>
+          <Text style={styles.linkText}>Já tem conta? Entrar{"    "}</Text>
         </TouchableOpacity>
       </View>
       </ScrollView>

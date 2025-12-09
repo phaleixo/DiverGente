@@ -19,7 +19,7 @@ const SignOutButton: React.FC = () => {
 
   return (
     <TouchableOpacity onPress={confirmLogout} style={{ alignItems: 'center', marginTop: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: theme.outline, backgroundColor: theme.surface }} activeOpacity={0.8}>
-      <Text style={{ color: theme.onSurface, fontWeight: '600' }}>Sair</Text>
+      <Text style={{ color: theme.onSurface, fontWeight: '600' }}>Sair{' '}</Text>
     </TouchableOpacity>
   );
 };

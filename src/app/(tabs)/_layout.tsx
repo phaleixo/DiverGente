@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import Tabs from 'expo-router/tabs';
 import React, { useMemo } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';

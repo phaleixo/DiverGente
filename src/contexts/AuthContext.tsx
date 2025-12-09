@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import supabase, { auth } from '@/config/supabase';
+import { auth } from '@/config/supabase';
 import * as SecureStore from 'expo-secure-store';
 
 type User = any;

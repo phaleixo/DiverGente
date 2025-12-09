@@ -1,14 +1,18 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, useColorScheme, FlatList, ListRenderItem } from 'react-native';
-import TaskListToday from '@/components/TaskListToday';
-import CalendarScreen from '@/components/CalendarScreen';
-import TodayDate from '@/components/TodayDate';
-import { Colors } from '@/constants/Colors';
-import ProfileHeader from '@/components/ProfileHeader';
-import { ThemedView } from '@/components/ThemedView';
-import Title from '@/components/Title';
-import { useTheme } from '@/contexts/ThemeContext';
-
+import React, { useMemo } from "react";
+import {
+  View,
+  StyleSheet,
+  useColorScheme,
+  FlatList,
+  ListRenderItem,
+} from "react-native";
+import TaskListToday from "@/components/TaskListToday";
+import CalendarScreen from "@/components/CalendarScreen";
+import TodayDate from "@/components/TodayDate";
+import ProfileHeader from "@/components/ProfileHeader";
+import { ThemedView } from "@/components/ThemedView";
+import Title from "@/components/Title";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface HomeItem {
   id: string;
@@ -16,25 +20,26 @@ interface HomeItem {
 }
 
 export default function HomeScreen() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === "dark";
   const { colors } = useTheme();
   const theme = isDarkMode ? colors.dark : colors.light;
-  const styles = useMemo(() => dynamicStyles(isDarkMode, theme), [isDarkMode, theme]);
+  const styles = useMemo(
+    () => dynamicStyles(isDarkMode, theme),
+    [isDarkMode, theme]
+  );
   const data: HomeItem[] = [
     {
-      id: 'calendar',
+      id: "calendar",
       render: () => <CalendarScreen />,
     },
     {
-      id: 'tasks',
+      id: "tasks",
       render: () => (
         <View style={styles.card}>
           <TaskListToday />
         </View>
       ),
     },
-    
-
   ];
 
   const renderItem: ListRenderItem<HomeItem> = ({ item }) => {
@@ -45,16 +50,17 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <FlatList
         data={data}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Title variant="h3" marginTop={20} marginBottom={10}>
-              <TodayDate shortMonth />
-            </Title>
+            <View style={{ flex: 1 }}>
+              <Title variant="h3" marginTop={20} marginBottom={10}>
+                <TodayDate shortMonth />
+              </Title>
+            </View>
             <ProfileHeader />
-            
           </View>
         }
         contentContainerStyle={{ padding: 15, paddingBottom: 90 }}
@@ -70,9 +76,9 @@ const dynamicStyles = (isDarkMode: boolean, theme: any) =>
       backgroundColor: theme.background,
     },
     header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       paddingHorizontal: 15,
       paddingTop: 20,
       paddingBottom: 10,
@@ -83,7 +89,6 @@ const dynamicStyles = (isDarkMode: boolean, theme: any) =>
       borderRadius: 15,
       backgroundColor: theme.surface,
       marginHorizontal: 10,
-
     },
     help: {
       padding: 20,
@@ -92,12 +97,11 @@ const dynamicStyles = (isDarkMode: boolean, theme: any) =>
       marginHorizontal: 10,
       marginVertical: 10,
       minHeight: 140,
-      justifyContent: 'center',
-
+      justifyContent: "center",
     },
     cardText: {
       fontSize: 18,
-      fontWeight: '600',
+      fontWeight: "600",
       color: theme.onSurface,
       marginBottom: 5,
     },
@@ -105,13 +109,13 @@ const dynamicStyles = (isDarkMode: boolean, theme: any) =>
       fontSize: 14,
       color: theme.onSurface,
       marginTop: 10,
-      alignItems: 'center',
+      alignItems: "center",
     },
     calm: {
-      flexDirection: 'row',
+      flexDirection: "row",
       padding: 0,
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      justifyContent: "space-between",
+      alignItems: "center",
     },
     listContent: {},
     iconButton: {
@@ -121,7 +125,7 @@ const dynamicStyles = (isDarkMode: boolean, theme: any) =>
       marginLeft: 8,
       padding: 4,
       borderRadius: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
   });

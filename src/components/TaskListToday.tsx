@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, useColorScheme, TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchTasks as sbFetchTasks } from '@/services/supabaseService';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  useColorScheme,
+  TouchableOpacity,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchTasks as sbFetchTasks } from "@/services/supabaseService";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter, useFocusEffect } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Task {
   id: number;
@@ -17,9 +23,12 @@ interface Task {
 
 const TaskListToday: React.FC = () => {
   const [tasksToday, setTasksToday] = useState<Task[]>([]);
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === "dark";
   const { colors } = useTheme();
-  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
+  const theme = useMemo(
+    () => (isDarkMode ? colors.dark : colors.light),
+    [isDarkMode, colors]
+  );
   const router = useRouter();
   const styles = useMemo(() => dynamicStyles(theme), [theme]);
 
@@ -43,11 +52,13 @@ const TaskListToday: React.FC = () => {
             completedAt: row.completed_at || undefined,
             dueDate: row.due_date || undefined,
           }));
-          const today = new Date().toISOString().split('T')[0];
-          const todaysTasks = mapped.filter(task => task.dueDate && task.dueDate <= today && !task.completed);
+          const today = new Date().toISOString().split("T")[0];
+          const todaysTasks = mapped.filter(
+            (task) => task.dueDate && task.dueDate <= today && !task.completed
+          );
           setTasksToday(todaysTasks);
           // também atualiza cache local
-          await AsyncStorage.setItem('tasks', JSON.stringify(mapped));
+          await AsyncStorage.setItem("tasks", JSON.stringify(mapped));
           return;
         }
       } catch (err) {
@@ -55,12 +66,12 @@ const TaskListToday: React.FC = () => {
         // console.debug('sbFetchTasks failed', err);
       }
 
-      const data = await AsyncStorage.getItem('tasks');
+      const data = await AsyncStorage.getItem("tasks");
       if (data) {
         const parsedTasks: Task[] = JSON.parse(data);
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split("T")[0];
 
-        const todaysTasks = parsedTasks.filter(task => {
+        const todaysTasks = parsedTasks.filter((task) => {
           return task.dueDate && task.dueDate <= today && !task.completed;
         });
         setTasksToday(todaysTasks);
@@ -68,13 +79,13 @@ const TaskListToday: React.FC = () => {
         setTasksToday([]);
       }
     } catch (e) {
-      console.error('Erro ao carregar tarefas de hoje:', e);
+      console.error("Erro ao carregar tarefas de hoje:", e);
       setTasksToday([]);
     }
   };
 
   const handlePress = () => {
-    router.push('/taskList');
+    router.push("/taskList");
   };
 
   return (
@@ -96,40 +107,44 @@ const TaskListToday: React.FC = () => {
   );
 };
 
-const dynamicStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: theme.surface,
-    borderRadius: 12,
-    padding: 4,
-    marginTop: 8,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginTop: 5,
-    paddingHorizontal: 2,
-  },
-  headerText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.onSurface,
-  },
-  taskCountCircle: {
-    backgroundColor: theme.primary,
-    borderRadius: 15,
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  taskCountText: {
-    color: theme.onPrimary,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-});
+const dynamicStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: theme.surface,
+      borderRadius: 12,
+      padding: 4,
+      marginTop: 8,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+      marginTop: 5,
+      paddingHorizontal: 2,
+    },
+    headerText: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.onSurface,
+      flex: 1,
+      marginHorizontal: 8,
+      textAlign: "center",
+    },
+    taskCountCircle: {
+      backgroundColor: theme.primary,
+      borderRadius: 15,
+      width: 28,
+      height: 28,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    taskCountText: {
+      color: theme.onPrimary,
+      fontSize: 14,
+      fontWeight: "700",
+    },
+  });
 
 export default TaskListToday;

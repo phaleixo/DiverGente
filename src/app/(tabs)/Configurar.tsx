@@ -1,7 +1,6 @@
 import React from 'react';
 import { Image, Text, StyleSheet, ScrollView, Linking, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/Colors';
 import Title from '@/components/Title';
 import ProfileHeader from '@/components/ProfileHeader';
 import SignOutButton from '@/components/SignOutButton';
@@ -35,7 +34,7 @@ const Config: React.FC = () => {
           style={styles.localImage}
         />
         <Text style={styles.footer}>
-          DiverGente v3.0 licenciado sob a MIT License.
+          DiverGente v3.1.0 licenciado sob a MIT License.
           {'\n'}
           Desenvolvido por phaleixo.
           {'\n'}

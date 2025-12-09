@@ -1,29 +1,46 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, Alert, ViewStyle, TextStyle, ImageStyle } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { Colors } from '@/constants/Colors';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Alert,
+  ViewStyle,
+  TextStyle,
+  ImageStyle,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
-const STORAGE_PREFIX = '@profile_image_';
+const STORAGE_PREFIX = "@profile_image_";
 
 interface ProfileHeaderProps {
   size?: number; // diameter of the avatar in px
-  layout?: 'left' | 'below'; // 'left' = row (name to the right), 'below' = column (name under image)
+  layout?: "left" | "below"; // 'left' = row (name to the right), 'below' = column (name under image)
   containerStyle?: ViewStyle;
   nameStyle?: TextStyle;
   imageStyle?: ImageStyle;
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left', containerStyle, nameStyle, imageStyle }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+  size = 32,
+  layout = "left",
+  containerStyle,
+  nameStyle,
+  imageStyle,
+}) => {
   const { user } = useAuth();
   const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = colorScheme === "dark";
   const { colors } = useTheme();
-  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
+  const theme = useMemo(
+    () => (isDarkMode ? colors.dark : colors.light),
+    [isDarkMode, colors]
+  );
   const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,7 +51,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
         const saved = await AsyncStorage.getItem(key);
         if (saved) setImageUri(saved);
       } catch (e) {
-        console.warn('Erro ao carregar imagem de perfil', e);
+        console.warn("Erro ao carregar imagem de perfil", e);
       }
     })();
   }, [user]);
@@ -45,9 +62,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
 
   const pickImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permissão necessária', 'Permita acesso às fotos para escolher uma imagem.');
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permissão necessária",
+          "Permita acesso às fotos para escolher uma imagem."
+        );
         return;
       }
 
@@ -73,28 +94,27 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
         }
       }
     } catch (e) {
-      console.warn('Erro ao escolher imagem', e);
+      console.warn("Erro ao escolher imagem", e);
     }
   };
 
-  const isRow = layout === 'left';
+  const isRow = layout === "left";
   const avatarSize = Math.max(24, size);
   const borderRadius = avatarSize / 2;
 
   return (
-    <View style={[{ alignItems: 'center', marginBottom: 4 }, containerStyle]}>
+    <View style={[{ alignItems: "center", marginBottom: 4 }, containerStyle]}>
       <TouchableOpacity
         onPress={pickImage}
         style={{
-          flexDirection: isRow ? 'row' : 'column',
-          alignItems: 'center',
+          flexDirection: isRow ? "row" : "column",
+          alignItems: "center",
           paddingHorizontal: 8,
           paddingVertical: 4,
-          
         }}
         activeOpacity={0.8}
       >
-        {isRow && layout === 'left' ? (
+        {isRow && layout === "left" ? (
           // name to the left of the avatar
           <>
             <Text
@@ -103,27 +123,47 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
                   marginRight: 8,
                   marginTop: 0,
                   color: theme.onSurface,
-                  fontWeight: '900',
+                  fontWeight: "900",
                   fontSize: Math.max(14, Math.round(avatarSize / 2.6)),
                 },
                 nameStyle,
               ]}
             >
-              {displayName}
+              {displayName + " "}
             </Text>
             {imageUri ? (
-              <Image source={{ uri: imageUri }} style={[{ width: avatarSize, height: avatarSize, borderRadius }, imageStyle]} />
+              <Image
+                source={{ uri: imageUri }}
+                style={[
+                  { width: avatarSize, height: avatarSize, borderRadius },
+                  imageStyle,
+                ]}
+              />
             ) : (
-              <MaterialCommunityIcons name="account" size={Math.round(avatarSize)} color={theme.onSurface} />
+              <MaterialCommunityIcons
+                name="account"
+                size={Math.round(avatarSize)}
+                color={theme.onSurface}
+              />
             )}
           </>
         ) : (
           // default: avatar then name (useful if layout === 'right' or column)
           <>
             {imageUri ? (
-              <Image source={{ uri: imageUri }} style={[{ width: avatarSize, height: avatarSize, borderRadius }, imageStyle]} />
+              <Image
+                source={{ uri: imageUri }}
+                style={[
+                  { width: avatarSize, height: avatarSize, borderRadius },
+                  imageStyle,
+                ]}
+              />
             ) : (
-              <MaterialCommunityIcons name="account" size={Math.round(avatarSize)} color={theme.onSurface} />
+              <MaterialCommunityIcons
+                name="account"
+                size={Math.round(avatarSize)}
+                color={theme.onSurface}
+              />
             )}
             <Text
               style={[
@@ -131,13 +171,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ size = 32, layout = 'left
                   marginLeft: isRow ? 8 : 0,
                   marginTop: isRow ? 0 : 8,
                   color: theme.onSurface,
-                  fontWeight: '600',
+                  fontWeight: "600",
                   fontSize: Math.max(12, Math.round(avatarSize / 2.6)),
                 },
                 nameStyle,
               ]}
             >
-              {displayName}
+              {displayName + " "}
             </Text>
           </>
         )}

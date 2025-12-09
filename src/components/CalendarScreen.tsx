@@ -401,7 +401,7 @@ const CalendarScreen = () => {
                       <MaterialCommunityIcons
                         name="trash-can-outline"
                         size={16}
-                        color="#ffffff"
+                        color={themeColors.background}
                       />
                     </View>
                   </TouchableOpacity>
@@ -662,7 +662,7 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       marginVertical: 6,
     },
     trashOnColor: {
-      backgroundColor: themeColors.error,
+      backgroundColor: themeColors.primary,
       borderRadius: 16,
       width: 30,
       height: 30,
