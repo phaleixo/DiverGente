@@ -1,18 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '@/config/supabase';
-import * as SecureStore from 'expo-secure-store';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { auth } from "@/config/supabase";
+import * as SecureStore from "expo-secure-store";
 
 type User = any;
 
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error?: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName?: string
+  ) => Promise<{ error?: any }>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
+  signInWithGoogle: () => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
 };
 
-const SESSION_KEY = 'supabase_session';
+const SESSION_KEY = "supabase_session";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -54,7 +59,9 @@ async function loadSession() {
   }
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -85,20 +92,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })();
 
     // observa mudanças de autenticação no supabase e persiste a sessão
-    const listener = (auth as any).onAuthStateChange?.((event: any, session: any) => {
-      const s = session?.data?.session ?? session ?? null;
-      saveSession(s);
-      try {
-        const u = s?.user ?? null;
-        setUser(u);
-      } catch (err) {
-        setUser(null);
+    const listener = (auth as any).onAuthStateChange?.(
+      (event: any, session: any) => {
+        const s = session?.data?.session ?? session ?? null;
+        saveSession(s);
+        try {
+          const u = s?.user ?? null;
+          setUser(u);
+        } catch (err) {
+          setUser(null);
+        }
       }
-    }) || { subscription: null };
+    ) || { subscription: null };
 
     return () => {
       mounted = false;
-      if (listener && listener.subscription && listener.subscription.unsubscribe) {
+      if (
+        listener &&
+        listener.subscription &&
+        listener.subscription.unsubscribe
+      ) {
         listener.subscription.unsubscribe();
       }
     };
@@ -113,15 +126,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (fullName) payload.options = { data: { full_name: fullName } };
 
         // prefer explicit redirect for confirmation email
-        const redirectUrl = 'https://phaleixo.github.io/DiverGente/confirm.html';
+        const redirectUrl =
+          "https://phaleixo.github.io/DiverGente/confirm.html";
         let res: any = null;
 
         // try common option keys used across supabase client versions
         try {
-          res = await (auth as any).signUp(payload, { emailRedirectTo: redirectUrl });
+          res = await (auth as any).signUp(payload, {
+            emailRedirectTo: redirectUrl,
+          });
         } catch (e) {
           try {
-            res = await (auth as any).signUp(payload, { redirectTo: redirectUrl });
+            res = await (auth as any).signUp(payload, {
+              redirectTo: redirectUrl,
+            });
           } catch (e2) {
             // last resort: call without redirect option
             res = await (auth as any).signUp(payload);
@@ -167,7 +185,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error: res?.error ?? null };
       }
 
-      return { error: new Error('Auth method not supported by current Supabase client') };
+      return {
+        error: new Error(
+          "Auth method not supported by current Supabase client"
+        ),
+      };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      // Usa signInWithOAuth do Supabase para login com Google
+      if ((auth as any).signInWithOAuth) {
+        const res = await (auth as any).signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: "myapp://",
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (res?.error) {
+          return { error: res.error };
+        }
+
+        // Retorna a URL para abrir no navegador
+        return { url: res?.data?.url, error: null };
+      }
+      return {
+        error: new Error("OAuth não suportado pelo cliente Supabase atual"),
+      };
     } catch (error) {
       return { error };
     }
@@ -186,7 +235,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user, loading, signUp, signIn, signInWithGoogle, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -194,7 +245,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
 

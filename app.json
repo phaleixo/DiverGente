@@ -9,14 +9,34 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "splash": {
+        "image": "./src/assets/images/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#F0F0F5",
+        "dark": {
+          "image": "./src/assets/images/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#020308"
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#F0F0F5"
       },
-      "package": "com.phaleixo.DiverGente"
+      "package": "com.phaleixo.DiverGente",
+      "splash": {
+        "image": "./src/assets/images/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#F0F0F5",
+        "dark": {
+          "image": "./src/assets/images/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#020308"
+        }
+      }
     },
     "splash": {
       "image": "./src/assets/images/splash-icon.png",
@@ -35,7 +55,12 @@
         {
           "image": "./src/assets/images/splash-icon.png",
           "imageWidth": 180,
-          "resizeMode": "contain"
+          "resizeMode": "contain",
+          "backgroundColor": "#F0F0F5",
+          "dark": {
+            "image": "./src/assets/images/splash-icon.png",
+            "backgroundColor": "#020308"
+          }
         }
       ]
       

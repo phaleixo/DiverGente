@@ -178,8 +178,12 @@ const TaskList: React.FC = () => {
           id: Number(row.id) || Date.now(),
           text: row.text,
           completed: !!row.completed,
-          createdAt: row.created_at || new Date().toLocaleString(),
-          completedAt: row.completed_at || undefined,
+          createdAt: row.created_at
+            ? new Date(row.created_at).toLocaleString()
+            : new Date().toLocaleString(),
+          completedAt: row.completed_at
+            ? new Date(row.completed_at).toLocaleString()
+            : undefined,
           dueDate: row.due_date || undefined,
         }));
         setTasks(sortTasks(mapped));
@@ -367,7 +371,9 @@ const TaskList: React.FC = () => {
             <View style={styles.modalBackground}>
               <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                  <Text style={styles.modalTitle}>Adicionar nova tarefa {'    '}</Text>
+                  <Text style={styles.modalTitle}>
+                    Adicionar nova tarefa {"    "}
+                  </Text>
                   <TextInput
                     placeholder="Digite o título da tarefa"
                     placeholderTextColor={theme.outline}
@@ -433,7 +439,7 @@ const TaskList: React.FC = () => {
                       onPress={addTask}
                       style={styles.modalAddButton}
                     >
-                      <Text style={styles.modalAddButtonText}>Adicionar {' '}</Text>
+                      <Text style={styles.modalAddButtonText}>Adicionar </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => {
@@ -443,7 +449,9 @@ const TaskList: React.FC = () => {
                       }}
                       style={styles.modalCancelButton}
                     >
-                      <Text style={styles.modalCancelButtonText}>Cancelar {' '}</Text>
+                      <Text style={styles.modalCancelButtonText}>
+                        Cancelar{" "}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>

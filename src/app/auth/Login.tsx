@@ -14,10 +14,17 @@ import {
 } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPasswordResetEmail } from "@/services/supabaseService";
+import { supabase } from "@/config/supabase";
+import { Ionicons } from "@expo/vector-icons";
+
+// Necessário para fechar o navegador corretamente após o OAuth
+WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -25,7 +32,7 @@ const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const isDarkMode = useColorScheme() === "dark";
   const styles = dynamicStyles(isDarkMode);
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const router = useRouter();
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -81,6 +88,64 @@ const LoginScreen: React.FC = () => {
       }
     })();
   }, []);
+
+  // Listener para capturar deep links do OAuth (quando app é aberto via URL)
+  useEffect(() => {
+    const handleDeepLink = async (event: { url: string }) => {
+      const url = event.url;
+      if (url) {
+        await processOAuthUrl(url);
+      }
+    };
+
+    // Verifica se o app foi aberto por um deep link
+    const checkInitialUrl = async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) {
+        await processOAuthUrl(initialUrl);
+      }
+    };
+
+    // Adiciona listener para deep links
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+    checkInitialUrl();
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  // Processa a URL do OAuth e extrai os tokens
+  const processOAuthUrl = async (url: string) => {
+    try {
+      const hashIndex = url.indexOf("#");
+      if (hashIndex !== -1) {
+        const fragment = url.substring(hashIndex + 1);
+        const params = new URLSearchParams(fragment);
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token");
+
+        if (accessToken && refreshToken) {
+          setLoading(true);
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (!error) {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            router.replace("/(tabs)");
+          } else {
+            Alert.alert("Erro", "Falha ao configurar sessão");
+          }
+          setLoading(false);
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao processar URL OAuth:", e);
+      setLoading(false);
+    }
+  };
 
   async function tryBiometricSignIn() {
     setLoading(true);
@@ -145,6 +210,80 @@ const LoginScreen: React.FC = () => {
     }
   }
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithGoogle();
+
+      if (result.error) {
+        Alert.alert(
+          "Erro",
+          result.error.message || "Falha ao iniciar login com Google"
+        );
+        setLoading(false);
+        return;
+      }
+
+      if ((result as any).url) {
+        // Cria uma URL de redirect simples
+        const redirectUrl = Linking.createURL("");
+
+        // Abre o navegador para autenticação
+        const authResult = await WebBrowser.openAuthSessionAsync(
+          (result as any).url,
+          redirectUrl
+        );
+
+        if (authResult.type === "success" && authResult.url) {
+          // Extrai os tokens da URL de callback
+          const url = authResult.url;
+          const hashIndex = url.indexOf("#");
+
+          if (hashIndex !== -1) {
+            const fragment = url.substring(hashIndex + 1);
+            const params = new URLSearchParams(fragment);
+            const accessToken = params.get("access_token");
+            const refreshToken = params.get("refresh_token");
+
+            if (accessToken && refreshToken) {
+              const { error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+
+              if (!error) {
+                // Aguarda a sessão ser propagada
+                await new Promise((resolve) => setTimeout(resolve, 300));
+                router.replace("/(tabs)");
+                setLoading(false);
+                return;
+              } else {
+                Alert.alert("Erro", "Falha ao configurar sessão");
+              }
+            }
+          }
+
+          // Tenta verificar se já existe sessão
+          const { data } = await supabase.auth.getSession();
+          if (data?.session) {
+            router.replace("/(tabs)");
+            setLoading(false);
+            return;
+          }
+        }
+
+        if (authResult.type === "cancel") {
+          // Usuário cancelou
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (error: any) {
+      Alert.alert("Erro", error?.message || "Erro ao fazer login com Google");
+    }
+    setLoading(false);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -156,10 +295,16 @@ const LoginScreen: React.FC = () => {
       >
         <View style={styles.header}>
           <Image
-            source={require("@/assets/images/icon.png")}
+            source={require("@/assets/images/splash-icon.png")}
             style={styles.appIcon}
           />
           <Text style={styles.appName}>DiverGente{"    "}</Text>
+          <Text style={styles.appDescription}>
+            Um aplicativo essencial com rotinas{"    "}
+          </Text>
+          <Text style={styles.appDescription}>
+            para organizar sua vida.{"    "}
+          </Text>
         </View>
         <View style={styles.form}>
           <TextInput
@@ -203,6 +348,7 @@ const LoginScreen: React.FC = () => {
               </Text>
             </TouchableOpacity>
           ) : null}
+
           <TouchableOpacity
             onPress={() => router.push("/auth/Register")}
             style={styles.linkButton}
@@ -250,6 +396,28 @@ const LoginScreen: React.FC = () => {
             style={[styles.linkButton, { marginTop: 6 }]}
           >
             <Text style={styles.linkText}>Esqueci minha senha{"    "}</Text>
+          </TouchableOpacity>
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>ou {" "}</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleGoogleSignIn}
+            style={styles.googleButton}
+            disabled={loading}
+          >
+            <Ionicons
+              name="logo-google"
+              size={20}
+              color="#fff"
+              style={styles.googleIcon}
+            />
+            <Text style={styles.googleButtonText}>
+              {loading ? "Entrando..." : "Continuar com Google"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -313,15 +481,55 @@ const dynamicStyles = (isDarkMode: boolean) =>
       marginBottom: 8,
     },
     appIcon: {
-      width: 96,
-      height: 96,
+      width: 148,
+      height: 128,
       borderRadius: 24,
       marginBottom: 8,
     },
     appName: {
-      fontSize: 28,
+      marginBottom: 8,
+      fontSize: 32,
+      textAlign: "center",
       fontWeight: "700",
       color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    },
+    appDescription: {
+      fontSize: 14,
+      textAlign: "center",
+      fontWeight: "400",
+      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+    },
+    dividerContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginVertical: 20,
+    },
+    divider: {
+      flex: 1,
+      height: 1,
+      backgroundColor: isDarkMode ? Colors.dark.outline : Colors.light.outline,
+    },
+    dividerText: {
+      marginHorizontal: 10,
+      color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
+      fontSize: 14,
+    },
+    googleButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#DB4437",
+      padding: 14,
+      borderRadius: 10,
+      width: "100%",
+    },
+    googleIcon: {
+      marginRight: 10,
+    },
+    googleButtonText: {
+      color: "#fff",
+      fontWeight: "700",
+      fontSize: 16,
     },
   });
 

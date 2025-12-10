@@ -1,21 +1,47 @@
-import Tabs from 'expo-router/tabs';
-import React, { useMemo } from 'react';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { TouchableWithoutFeedback, View, StatusBar,} from 'react-native';
-import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
-
-
-
+import Tabs from "expo-router/tabs";
+import React, { useMemo } from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import {
+  TouchableWithoutFeedback,
+  View,
+  StatusBar,
+  Platform,
+} from "react-native";
+import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === "dark";
   const { colors } = useTheme();
-  const theme = useMemo(() => isDarkMode ? colors.dark : colors.light, [isDarkMode, colors]);
-  const NoFeedbackTabButton = ({ children, onPress, onLongPress, accessibilityState, accessibilityLabel, testID }: BottomTabBarButtonProps) => (
+  const theme = useMemo(
+    () => (isDarkMode ? colors.dark : colors.light),
+    [isDarkMode, colors]
+  );
+  const insets = useSafeAreaInsets();
+
+  // No Android com navegação por botões, insets.bottom será > 0
+  // Adiciona margem base de 12 + o inset inferior para respeitar a área segura
+  const bottomMargin =
+    Platform.OS === "android" ? Math.max(12, insets.bottom + 12) : 12;
+
+  // Ajusta o marginTop do ícone baseado no tipo de navegação
+  // Com navegação por gestos (insets.bottom pequeno), precisa de menos marginTop
+  // Com navegação por botões (insets.bottom maior), precisa de mais marginTop
+  const iconMarginTop =
+    Platform.OS === "android" ? (insets.bottom > 28 ? 46 : 28) : 36;
+
+  const NoFeedbackTabButton = ({
+    children,
+    onPress,
+    onLongPress,
+    accessibilityState,
+    accessibilityLabel,
+    testID,
+  }: BottomTabBarButtonProps) => (
     <TouchableWithoutFeedback
       onPress={onPress ?? undefined}
       onLongPress={onLongPress ?? undefined}
@@ -23,69 +49,71 @@ export default function TabLayout() {
       accessibilityLabel={accessibilityLabel}
       testID={testID}
     >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>{children}</View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        {children}
+      </View>
     </TouchableWithoutFeedback>
   );
   return (
     <>
       <StatusBar
         backgroundColor={theme.background}
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
       />
       <AuthGate />
       <Tabs
         screenOptions={{
-          animation: 'shift',
+          animation: "shift",
           tabBarActiveTintColor: theme.primary,
           tabBarInactiveTintColor: theme.outline,
           headerShown: false,
           tabBarStyle: {
-            position: 'absolute',
-            height: 80,
+            position: "absolute",
+            height: 70,
             backgroundColor: theme.surface,
             borderRadius: 12,
-            marginHorizontal: 12,
-            marginBottom: 12,
-            left: 0,
-            right: 0,
+            marginHorizontal: 16,
+            marginBottom: bottomMargin,
             borderTopWidth: 0,
             borderWidth: 0,
-            borderColor: 'transparent',
+            borderColor: "transparent",
             elevation: 0,
             shadowOpacity: 0,
             shadowOffset: { width: 0, height: 0 },
-            shadowColor: 'transparent',
-            overflow: 'visible',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
+            shadowColor: "transparent",
+            flexDirection: "row",
+            justifyContent: "center",
           },
           tabBarItemStyle: {
             borderRadius: 24,
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
+            justifyContent: "center",
+            alignItems: "center",
             flex: 1,
-            marginTop: 18,
           },
-          tabBarActiveBackgroundColor: isDarkMode ? 'transparent' : theme.primary + '15',
-          tabBarInactiveBackgroundColor: 'transparent',
+          tabBarActiveBackgroundColor: isDarkMode
+            ? "transparent"
+            : theme.primary + "15",
+          tabBarInactiveBackgroundColor: "transparent",
           tabBarLabelStyle: {
             fontSize: 12,
-            marginTop: 2,
           },
           tabBarIconStyle: {
-            justifyContent: 'center',
-            alignItems: 'center',
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: iconMarginTop,
           },
         }}
       >
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
+            title: "Home",
             tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons size={28} name="home-outline" color={color} />
+              <MaterialCommunityIcons
+                size={28}
+                name="home-outline"
+                color={color}
+              />
             ),
             tabBarButton: NoFeedbackTabButton,
           }}
@@ -93,9 +121,13 @@ export default function TabLayout() {
         <Tabs.Screen
           name="taskList"
           options={{
-            title: 'Tarefas',
+            title: "Tarefas",
             tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons size={28} name="check-circle-outline" color={color} />
+              <MaterialCommunityIcons
+                size={28}
+                name="check-circle-outline"
+                color={color}
+              />
             ),
             tabBarButton: NoFeedbackTabButton,
           }}
@@ -103,9 +135,13 @@ export default function TabLayout() {
         <Tabs.Screen
           name="diario"
           options={{
-            title: 'Diario',
+            title: "Diario",
             tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons size={28} name="emoticon-outline" color={color} />
+              <MaterialCommunityIcons
+                size={28}
+                name="emoticon-outline"
+                color={color}
+              />
             ),
             tabBarButton: NoFeedbackTabButton,
           }}
@@ -113,9 +149,13 @@ export default function TabLayout() {
         <Tabs.Screen
           name="decision"
           options={{
-            title: 'Decisão',
+            title: "Decisão",
             tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons size={28} name="shield-outline" color={color} />
+              <MaterialCommunityIcons
+                size={28}
+                name="shield-outline"
+                color={color}
+              />
             ),
             tabBarButton: NoFeedbackTabButton,
           }}
@@ -123,9 +163,13 @@ export default function TabLayout() {
         <Tabs.Screen
           name="Configurar"
           options={{
-            title: 'Configure',
+            title: "Configure",
             tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons size={28} name="cog-outline" color={color} />
+              <MaterialCommunityIcons
+                size={28}
+                name="cog-outline"
+                color={color}
+              />
             ),
             tabBarButton: NoFeedbackTabButton,
           }}
@@ -143,7 +187,7 @@ function AuthGate() {
     if (!loading && !user) {
       // redirect to auth login route outside of render
       try {
-        router.replace('/auth/Login');
+        router.replace("/auth/Login");
       } catch (e) {}
     }
   }, [loading, user, router]);
@@ -151,7 +195,3 @@ function AuthGate() {
   if (loading) return null;
   return null;
 }
-
-
-
-

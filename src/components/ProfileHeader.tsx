@@ -58,7 +58,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   if (!user) return null;
 
-  const displayName = user?.user_metadata?.full_name;
+  // Pega apenas o primeiro nome
+  const fullName =
+    user?.user_metadata?.full_name || user?.user_metadata?.name || "";
+  const displayName = fullName.split(" ")[0];
+
+  // Pega a foto do Google (avatar_url ou picture)
+  const googleAvatarUrl =
+    user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
+
+  // Usa a imagem salva localmente, ou a foto do Google como fallback
+  const profileImage = imageUri || googleAvatarUrl;
 
   const pickImage = async () => {
     try {
@@ -131,9 +141,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             >
               {displayName + " "}
             </Text>
-            {imageUri ? (
+            {profileImage ? (
               <Image
-                source={{ uri: imageUri }}
+                source={{ uri: profileImage }}
                 style={[
                   { width: avatarSize, height: avatarSize, borderRadius },
                   imageStyle,
@@ -150,9 +160,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         ) : (
           // default: avatar then name (useful if layout === 'right' or column)
           <>
-            {imageUri ? (
+            {profileImage ? (
               <Image
-                source={{ uri: imageUri }}
+                source={{ uri: profileImage }}
                 style={[
                   { width: avatarSize, height: avatarSize, borderRadius },
                   imageStyle,

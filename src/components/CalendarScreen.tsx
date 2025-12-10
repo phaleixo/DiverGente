@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -9,26 +9,65 @@ import {
   Button,
   FlatList,
   TouchableOpacity,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchEvents as sbFetchEvents, upsertEvent as sbUpsertEvent, deleteEvent as sbDeleteEvent } from '@/services/supabaseService';
-import { useAuth } from '@/contexts/AuthContext';
-import { Calendar, LocaleConfig, DateData } from 'react-native-calendars';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../constants/Colors';
-import { useTheme } from '@/contexts/ThemeContext';
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  fetchEvents as sbFetchEvents,
+  upsertEvent as sbUpsertEvent,
+  deleteEvent as sbDeleteEvent,
+} from "@/services/supabaseService";
+import { useAuth } from "@/contexts/AuthContext";
+import { Calendar, LocaleConfig, DateData } from "react-native-calendars";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors } from "../constants/Colors";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useHolidays, getHolidaysForYear } from "./HolidayToggle";
 
 // Configuração de localização
-LocaleConfig.locales['pt-br'] = {
-  monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
-  monthNamesShort: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
-  dayNames: ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],
-  dayNamesShort: ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
-  today: 'Hoje'
+LocaleConfig.locales["pt-br"] = {
+  monthNames: [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+  ],
+  monthNamesShort: [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
+  ],
+  dayNames: [
+    "Domingo",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+  ],
+  dayNamesShort: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
+  today: "Hoje",
 };
-LocaleConfig.defaultLocale = 'pt-br';
+LocaleConfig.defaultLocale = "pt-br";
 
-const STORAGE_KEY = '@calendar_events';
+const STORAGE_KEY = "@calendar_events";
 
 type Event = {
   id?: string;
@@ -43,7 +82,7 @@ type EventsByDate = {
 const CalendarScreen = () => {
   // util: converte hex para rgba com alpha
   const hexToRgba = (hex: string, alpha = 1) => {
-    const normalized = hex.replace('#', '');
+    const normalized = hex.replace("#", "");
     const bigint = parseInt(normalized, 16);
     const r = (bigint >> 16) & 255;
     const g = (bigint >> 8) & 255;
@@ -53,60 +92,85 @@ const CalendarScreen = () => {
 
   // Configuração de tema
   const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = colorScheme === "dark";
   const { colors, currentTheme } = useTheme();
   const themeColors = isDarkMode ? colors.dark : colors.light;
-  const styles = useMemo(() => dynamicStyles(isDarkMode, themeColors), [isDarkMode, themeColors, colors]);
-  const calendarKey = useMemo(() => currentTheme + '-' + (isDarkMode ? 'dark' : 'light'), [currentTheme, isDarkMode]);
+  const styles = useMemo(
+    () => dynamicStyles(isDarkMode, themeColors),
+    [isDarkMode, themeColors, colors]
+  );
+  const calendarKey = useMemo(
+    () => currentTheme + "-" + (isDarkMode ? "dark" : "light"),
+    [currentTheme, isDarkMode]
+  );
 
   // Estados do calendário
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [currentMonth, setCurrentMonth] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [currentMonth, setCurrentMonth] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
 
   // Estados de eventos
   const [events, setEvents] = useState<EventsByDate>({});
   const [eventModalVisible, setEventModalVisible] = useState<boolean>(false);
-  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState<boolean>(false);
-  const [eventToDeleteIndex, setEventToDeleteIndex] = useState<number | null>(null);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] =
+    useState<boolean>(false);
+  const [eventToDeleteIndex, setEventToDeleteIndex] = useState<number | null>(
+    null
+  );
 
   // Estados do formulário de evento
-  const [eventText, setEventText] = useState<string>('');
+  const [eventText, setEventText] = useState<string>("");
   const [startDate, setStartDate] = useState<string>(selectedDate);
   const [endDate, setEndDate] = useState<string>(selectedDate);
-  const [eventColor, setEventColor] = useState<string>('#2196F3');
+  const [eventColor, setEventColor] = useState<string>("#2196F3");
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(false);
   const [showEndCalendar, setShowEndCalendar] = useState<boolean>(false);
 
   // Cores disponíveis para eventos
-  const availableColors = ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0'];
+  const availableColors = [
+    "#2196F3",
+    "#4CAF50",
+    "#FF9800",
+    "#F44336",
+    "#9C27B0",
+  ];
 
   // Tema do calendário
-  const calendarTheme = useMemo(() => ({
-    backgroundColor: themeColors.background,
-    calendarBackground: themeColors.surface,
-    textSectionTitleColor: themeColors.onSurface,
-    textSectionTitleDisabledColor: themeColors.onSurfaceDisabled,
-    dayTextColor: themeColors.onSurface,
-    todayTextColor: themeColors.primary,
-    selectedDayTextColor: themeColors.onPrimary,
-    monthTextColor: themeColors.onSurface,
-    indicatorColor: themeColors.primary,
-    selectedDayBackgroundColor: themeColors.primary,
-    arrowColor: themeColors.primary,
-    disabledArrowColor: themeColors.onSurfaceDisabled,
-    textDayFontWeight: '600' as '600',
-    textMonthFontWeight: '800' as '800',
-    textDayHeaderFontWeight: '800' as '800',
-    textDayFontSize: 16,
-    textMonthFontSize: 18,
-    textDayHeaderFontSize: 14,
-    textDisabledColor: themeColors.onSurfaceDisabled,
-    dotColor: themeColors.primary,
-    selectedDotColor: themeColors.onPrimary,
-  }), [themeColors, colors]);
+  const calendarTheme = useMemo(
+    () => ({
+      backgroundColor: themeColors.background,
+      calendarBackground: themeColors.surface,
+      textSectionTitleColor: themeColors.onSurface,
+      textSectionTitleDisabledColor: themeColors.onSurfaceDisabled,
+      dayTextColor: themeColors.onSurface,
+      todayTextColor: themeColors.primary,
+      selectedDayTextColor: themeColors.onPrimary,
+      monthTextColor: themeColors.onSurface,
+      indicatorColor: themeColors.primary,
+      selectedDayBackgroundColor: themeColors.primary,
+      arrowColor: themeColors.primary,
+      disabledArrowColor: themeColors.onSurfaceDisabled,
+      textDayFontWeight: "600" as "600",
+      textMonthFontWeight: "800" as "800",
+      textDayHeaderFontWeight: "800" as "800",
+      textDayFontSize: 16,
+      textMonthFontSize: 18,
+      textDayHeaderFontSize: 14,
+      textDisabledColor: themeColors.onSurfaceDisabled,
+      dotColor: themeColors.primary,
+      selectedDotColor: themeColors.onPrimary,
+    }),
+    [themeColors, colors]
+  );
 
   // Carregar eventos: espera autenticação; se não autenticado, carrega apenas local
   const { user, loading: authLoading } = useAuth();
+
+  // Hook para feriados
+  const { holidaysEnabled } = useHolidays();
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -143,13 +207,22 @@ const CalendarScreen = () => {
         remoteData.forEach((row: any) => {
           const date = row.date;
           if (!parsedRemote[date]) parsedRemote[date] = [];
-          const ev = { id: row.id?.toString(), text: row.text, color: row.color };
+          const ev = {
+            id: row.id?.toString(),
+            text: row.text,
+            color: row.color,
+          };
           parsedRemote[date].push(ev);
           if (ev.id) remoteById[ev.id] = { date, row } as any;
         });
 
         // Encontrar eventos locais que não existem remotamente
-        const toSyncLocals: Array<{ id: string; date: string; text: string; color: string }> = [];
+        const toSyncLocals: Array<{
+          id: string;
+          date: string;
+          text: string;
+          color: string;
+        }> = [];
         Object.entries(local).forEach(([date, list]) => {
           list.forEach((ev) => {
             if (!ev.id) {
@@ -157,7 +230,12 @@ const CalendarScreen = () => {
               ev.id = `${Date.now()}-${date}`;
             }
             if (!remoteById[ev.id?.toString()]) {
-              toSyncLocals.push({ id: ev.id!.toString(), date, text: ev.text, color: ev.color });
+              toSyncLocals.push({
+                id: ev.id!.toString(),
+                date,
+                text: ev.text,
+                color: ev.color,
+              });
             }
           });
         });
@@ -167,7 +245,8 @@ const CalendarScreen = () => {
         Object.entries(local).forEach(([date, list]) => {
           list.forEach((ev) => {
             if (!merged[date]) merged[date] = [];
-            if (!merged[date].some((r) => r.id === ev.id)) merged[date].push(ev);
+            if (!merged[date].some((r) => r.id === ev.id))
+              merged[date].push(ev);
           });
         });
 
@@ -184,14 +263,19 @@ const CalendarScreen = () => {
         (async () => {
           for (const ev of toSyncLocals) {
             try {
-              await sbUpsertEvent({ id: ev.id, date: ev.date, text: ev.text, color: ev.color } as any);
+              await sbUpsertEvent({
+                id: ev.id,
+                date: ev.date,
+                text: ev.text,
+                color: ev.color,
+              } as any);
             } catch (err) {
               // ignore
             }
           }
         })();
       } catch (e) {
-        console.error('Erro ao carregar eventos:', e);
+        console.error("Erro ao carregar eventos:", e);
       }
     };
 
@@ -205,7 +289,7 @@ const CalendarScreen = () => {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(events));
       } catch (e) {
-        console.error('Erro ao salvar eventos:', e);
+        console.error("Erro ao salvar eventos:", e);
       }
     };
     saveEvents();
@@ -217,8 +301,12 @@ const CalendarScreen = () => {
     const endDateObj = new Date(end);
     const dates: string[] = [];
 
-    for (let d = new Date(startDateObj); d <= endDateObj; d.setDate(d.getDate() + 1)) {
-      dates.push(d.toISOString().split('T')[0]);
+    for (
+      let d = new Date(startDateObj);
+      d <= endDateObj;
+      d.setDate(d.getDate() + 1)
+    ) {
+      dates.push(d.toISOString().split("T")[0]);
     }
 
     return dates;
@@ -238,13 +326,18 @@ const CalendarScreen = () => {
       updatedEvents[date].push(newEv);
       // sincroniza com Supabase e registra resultado para debug
       (async () => {
-          try {
-          const res = await sbUpsertEvent({ id, date, text: eventText, color: eventColor } as any);
+        try {
+          const res = await sbUpsertEvent({
+            id,
+            date,
+            text: eventText,
+            color: eventColor,
+          } as any);
           if (res?.error) {
             // error returned from supabase, handled silently
           }
         } catch (err) {
-          console.error('sbUpsertEvent threw', err);
+          console.error("sbUpsertEvent threw", err);
         }
       })();
     });
@@ -264,10 +357,10 @@ const CalendarScreen = () => {
 
   // Resetar formulário de evento
   const resetEventForm = (): void => {
-    setEventText('');
+    setEventText("");
     setStartDate(selectedDate);
     setEndDate(selectedDate);
-    setEventColor('#2196F3');
+    setEventColor("#2196F3");
   };
 
   // Confirmar exclusão de evento
@@ -291,7 +384,7 @@ const CalendarScreen = () => {
           try {
             await sbDeleteEvent(ev.id as string);
           } catch (err) {
-            console.error('sbDeleteEvent threw', err);
+            console.error("sbDeleteEvent threw", err);
           }
         })();
       }
@@ -319,7 +412,7 @@ const CalendarScreen = () => {
 
   // Formatar data para exibição
   const formatDate = (date: string): string => {
-    const [year, month, day] = date.split('-');
+    const [year, month, day] = date.split("-");
     return `${day}/${month}/${year}`;
   };
 
@@ -343,17 +436,47 @@ const CalendarScreen = () => {
   // Datas marcadas no calendário
   const markedDates = useMemo(() => {
     const marks: { [key: string]: any } = {};
+
+    // Adicionar feriados se habilitado
+    if (holidaysEnabled) {
+      const currentYear = new Date(currentMonth).getFullYear();
+      // Pegar feriados do ano atual e adjacentes para navegação
+      const years = [currentYear - 1, currentYear, currentYear + 1];
+      years.forEach((year) => {
+        const holidays = getHolidaysForYear(year);
+        Object.entries(holidays).forEach(([date, name]) => {
+          if (!marks[date]) {
+            marks[date] = {
+              dots: [{ color: "#FF69B4" }], // Pink para feriados
+              marked: true,
+              holiday: name,
+            };
+          } else {
+            marks[date].dots = [
+              ...(marks[date].dots || []),
+              { color: "#FF69B4" },
+            ];
+            marks[date].holiday = name;
+          }
+        });
+      });
+    }
+
+    // Adicionar eventos do usuário
     Object.entries(events).forEach(([date, eventList]) => {
       const dots = eventList.map((e) => ({ color: e.color }));
-      marks[date] = {
-        dots,
-        marked: true,
-        selected: selectedDate === date,
-        selectedColor: selectedDate === date ? themeColors.primary : undefined,
-      };
+      if (marks[date]) {
+        marks[date].dots = [...(marks[date].dots || []), ...dots];
+        marks[date].marked = true;
+      } else {
+        marks[date] = {
+          dots,
+          marked: true,
+        };
+      }
     });
-    // Garantir que a data selecionada tenha uma marcação, mesmo sem eventos,
-    // para que o calendário exiba o círculo de seleção.
+
+    // Garantir que a data selecionada tenha uma marcação
     if (!marks[selectedDate]) {
       marks[selectedDate] = {
         selected: true,
@@ -365,7 +488,13 @@ const CalendarScreen = () => {
     }
 
     return marks;
-  }, [events, selectedDate, themeColors.primary]);
+  }, [
+    events,
+    selectedDate,
+    themeColors.primary,
+    holidaysEnabled,
+    currentMonth,
+  ]);
 
   return (
     <View style={styles.container}>
@@ -383,18 +512,68 @@ const CalendarScreen = () => {
         />
       </View>
 
+      {/* Exibir feriado se a data selecionada for um feriado */}
+      {holidaysEnabled && markedDates[selectedDate]?.holiday && (
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: "#E91E6325",
+              marginBottom: 10,
+            },
+          ]}
+        >
+          <View style={styles.eventCard}>
+            <View style={styles.eventRowLeft}>
+              <MaterialCommunityIcons
+                name="party-popper"
+                size={22}
+                color="#ff00f2ff"
+                style={{ marginRight: 10, alignSelf: "center" }}
+              />
+              <Text
+                style={[
+                  styles.eventText,
+                  { color: themeColors.onSurface, fontWeight: "600" },
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {markedDates[selectedDate].holiday}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
+
       {/* Lista de Eventos para a Data Selecionada */}
       {selectedDate && events[selectedDate] && (
         <View style={styles.card}>
           <FlatList
             data={events[selectedDate]}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : `${item.text}-${index}`}
+            keyExtractor={(item, index) =>
+              item.id ? item.id.toString() : `${item.text}-${index}`
+            }
             renderItem={({ item, index }) => {
               return (
                 <View style={styles.eventCard}>
                   <View style={styles.eventRowLeft}>
-                    <MaterialCommunityIcons name="circle" size={12} color={item.color} style={{ marginRight: 10, alignSelf: 'center' }} />
-                    <Text style={[styles.eventText, { color: themeColors.onSurface }]} numberOfLines={1} ellipsizeMode="tail">{item.text}</Text>
+                    <MaterialCommunityIcons
+                      name="circle"
+                      size={12}
+                      color={item.color}
+                      style={{ marginRight: 10, alignSelf: "center" }}
+                    />
+                    <Text
+                      style={[
+                        styles.eventText,
+                        { color: themeColors.onSurface },
+                      ]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {item.text}
+                    </Text>
                   </View>
                   <TouchableOpacity onPress={() => confirmDeleteEvent(index)}>
                     <View style={styles.trashOnColor}>
@@ -417,7 +596,8 @@ const CalendarScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
-              Adicionar evento de {formatDate(startDate)} a {formatDate(endDate)}
+              Adicionar evento de {formatDate(startDate)} a{" "}
+              {formatDate(endDate)}
             </Text>
 
             <TextInput
@@ -429,18 +609,22 @@ const CalendarScreen = () => {
               maxLength={50}
             />
 
-            <TouchableOpacity 
-              style={styles.input} 
+            <TouchableOpacity
+              style={styles.input}
               onPress={() => setShowStartCalendar(true)}
             >
-              <Text style={{ color: themeColors.onSurface }}>Data início: {formatDate(startDate)}</Text>
+              <Text style={{ color: themeColors.onSurface }}>
+                Data início: {formatDate(startDate)}
+              </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={styles.input} 
+            <TouchableOpacity
+              style={styles.input}
               onPress={() => setShowEndCalendar(true)}
             >
-              <Text style={{ color: themeColors.onSurface }}>Data fim: {formatDate(endDate)}</Text>
+              <Text style={{ color: themeColors.onSurface }}>
+                Data fim: {formatDate(endDate)}
+              </Text>
             </TouchableOpacity>
 
             {showStartCalendar && (
@@ -449,11 +633,17 @@ const CalendarScreen = () => {
                   current={startDate}
                   onDayPress={handleStartDateSelect}
                   markedDates={{
-                    [startDate]: {selected: true, selectedColor: themeColors.primary}
+                    [startDate]: {
+                      selected: true,
+                      selectedColor: themeColors.primary,
+                    },
                   }}
                   theme={calendarTheme}
                 />
-                <Button title="Fechar" onPress={() => setShowStartCalendar(false)} />
+                <Button
+                  title="Fechar"
+                  onPress={() => setShowStartCalendar(false)}
+                />
               </View>
             )}
 
@@ -463,15 +653,26 @@ const CalendarScreen = () => {
                   current={endDate}
                   onDayPress={handleEndDateSelect}
                   markedDates={{
-                    [endDate]: {selected: true, selectedColor: themeColors.primary},
-                    ...(new Date(endDate) < new Date(startDate) ? {
-                      [startDate]: {selected: true, selectedColor: themeColors.error}
-                    } : {})
+                    [endDate]: {
+                      selected: true,
+                      selectedColor: themeColors.primary,
+                    },
+                    ...(new Date(endDate) < new Date(startDate)
+                      ? {
+                          [startDate]: {
+                            selected: true,
+                            selectedColor: themeColors.error,
+                          },
+                        }
+                      : {}),
                   }}
                   minDate={startDate}
                   theme={calendarTheme}
                 />
-                <Button title="Fechar" onPress={() => setShowEndCalendar(false)} />
+                <Button
+                  title="Fechar"
+                  onPress={() => setShowEndCalendar(false)}
+                />
               </View>
             )}
 
@@ -484,29 +685,47 @@ const CalendarScreen = () => {
                     styles.colorOption,
                     {
                       backgroundColor: color,
-                      borderColor: eventColor === color ? (isDarkMode ? '#ffffff' : '#000000') : themeColors.outline,
+                      borderColor:
+                        eventColor === color
+                          ? isDarkMode
+                            ? "#ffffff"
+                            : "#000000"
+                          : themeColors.outline,
                       borderWidth: eventColor === color ? 2 : 1,
-                      transform: eventColor === color ? [{ scale: 1.04 }] : [{ scale: 1 }],
-                      ...(eventColor === color && isDarkMode ? {
-                        shadowColor: '#ffffff',
-                        shadowOffset: { width: 0, height: 1 },
-                        shadowOpacity: 0.12,
-                        shadowRadius: 3,
-                        elevation: 4,
-                      } : {}),
-                    }
+                      transform:
+                        eventColor === color
+                          ? [{ scale: 1.04 }]
+                          : [{ scale: 1 }],
+                      ...(eventColor === color && isDarkMode
+                        ? {
+                            shadowColor: "#ffffff",
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.12,
+                            shadowRadius: 3,
+                            elevation: 4,
+                          }
+                        : {}),
+                    },
                   ]}
                 />
               ))}
             </View>
 
             <View style={styles.modalButtons}>
-              <Button title="Salvar Evento" color={themeColors.primary} onPress={addEvent} />
+              <Button
+                title="Salvar Evento"
+                color={themeColors.primary}
+                onPress={addEvent}
+              />
               <View style={styles.space} />
-              <Button title="Cancelar" color={themeColors.outline} onPress={() => {
-                setEventModalVisible(false);
-                resetEventForm();
-              }} />
+              <Button
+                title="Cancelar"
+                color={themeColors.outline}
+                onPress={() => {
+                  setEventModalVisible(false);
+                  resetEventForm();
+                }}
+              />
             </View>
           </View>
         </View>
@@ -516,11 +735,21 @@ const CalendarScreen = () => {
       <Modal visible={confirmDeleteVisible} transparent animationType="fade">
         <View style={styles.modalContainer}>
           <View style={styles.confirmModalContent}>
-            <Text style={styles.confirmModalText}>Tem certeza que deseja excluir este evento?</Text>
+            <Text style={styles.confirmModalText}>
+              Tem certeza que deseja excluir este evento?
+            </Text>
             <View style={styles.confirmModalButtons}>
-              <Button title="Excluir" color={themeColors.error} onPress={deleteEvent} />
+              <Button
+                title="Excluir"
+                color={themeColors.error}
+                onPress={deleteEvent}
+              />
               <View style={styles.space} />
-              <Button title="Cancelar" color={themeColors.primary} onPress={() => setConfirmDeleteVisible(false)} />
+              <Button
+                title="Cancelar"
+                color={themeColors.primary}
+                onPress={() => setConfirmDeleteVisible(false)}
+              />
             </View>
           </View>
         </View>
@@ -535,20 +764,19 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
     container: {
       flex: 1,
       backgroundColor: themeColors.background,
-      },
+    },
     calendarWrapper: {
       borderRadius: 15,
-      overflow: 'hidden',
+      overflow: "hidden",
       backgroundColor: themeColors.surface,
       margin: 10,
-      
     },
     calendar: {
       marginBottom: 10,
     },
     modalContainer: {
       flex: 1,
-      justifyContent: 'center',
+      justifyContent: "center",
       padding: 20,
       backgroundColor: themeColors.backdrop,
     },
@@ -561,9 +789,9 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
     modalTitle: {
       fontSize: 18,
       marginBottom: 15,
-      fontWeight: 'bold',
+      fontWeight: "bold",
       color: themeColors.onSurface,
-      textAlign: 'center',
+      textAlign: "center",
     },
     input: {
       borderWidth: 1,
@@ -576,11 +804,11 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
     calendarContainer: {
       marginBottom: 15,
       borderRadius: 10,
-      overflow: 'hidden',
+      overflow: "hidden",
     },
     modalButtons: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      justifyContent: "space-between",
     },
     space: {
       width: 10,
@@ -590,60 +818,59 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       marginHorizontal: 10,
       borderRadius: 15,
       backgroundColor: themeColors.surface,
-      
     },
     eventRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       marginVertical: 5,
       paddingVertical: 5,
     },
     eventRowLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       flex: 1,
       marginRight: 8,
     },
     eventText: {
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: "600",
       flex: 1,
       lineHeight: 20,
-      alignSelf: 'center',
+      alignSelf: "center",
     },
     confirmModalContent: {
       backgroundColor: themeColors.surface,
       padding: 25,
       borderRadius: 15,
-      alignItems: 'center',
+      alignItems: "center",
       elevation: 5,
     },
     confirmModalText: {
       fontSize: 18,
       marginBottom: 20,
       color: themeColors.onSurface,
-      textAlign: 'center',
+      textAlign: "center",
     },
     confirmModalButtons: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      width: '100%',
+      flexDirection: "row",
+      justifyContent: "space-around",
+      width: "100%",
     },
     trashCircle: {
       backgroundColor: themeColors.error,
       borderRadius: 20,
       width: 24,
       height: 24,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       marginLeft: 10,
     },
     colorPicker: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexDirection: "row",
+      flexWrap: "wrap",
       marginBottom: 15,
-      justifyContent: 'center',
+      justifyContent: "center",
     },
     colorOption: {
       width: 30,
@@ -653,9 +880,9 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       borderWidth: 3,
     },
     eventCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       paddingVertical: 0,
       paddingHorizontal: 12,
       borderRadius: 12,
@@ -666,8 +893,8 @@ const dynamicStyles = (isDarkMode: boolean, themeColors: typeof Colors.light) =>
       borderRadius: 16,
       width: 30,
       height: 30,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       marginLeft: 10,
     },
   });
