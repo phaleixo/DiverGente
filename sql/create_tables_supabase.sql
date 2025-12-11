@@ -153,3 +153,39 @@ create policy "users_manage_own_diary_insert" on public.diary_entries
 
 create index if not exists diary_user_id_idx on public.diary_entries (user_id);
 create index if not exists diary_created_at_idx on public.diary_entries (created_at);
+
+-- =====================
+-- Deletar em cascata  
+-- =====================
+   
+-- DECISIONS
+alter table public.decisions
+  drop constraint decisions_user_id_fkey,
+  add constraint decisions_user_id_fkey
+    foreign key (user_id)
+    references auth.users(id)
+    on delete cascade;
+
+-- DIARY ENTRIES
+alter table public.diary_entries
+  drop constraint diary_entries_user_id_fkey,
+  add constraint diary_entries_user_id_fkey
+    foreign key (user_id)
+    references auth.users(id)
+    on delete cascade;
+
+-- EVENTS
+alter table public.events
+  drop constraint events_user_id_fkey,
+  add constraint events_user_id_fkey
+    foreign key (user_id)
+    references auth.users(id)
+    on delete cascade;
+
+-- TASKS
+alter table public.tasks
+  drop constraint tasks_user_id_fkey,
+  add constraint tasks_user_id_fkey
+    foreign key (user_id)
+    references auth.users(id)
+    on delete cascade;
