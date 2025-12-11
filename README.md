@@ -1,103 +1,159 @@
-# DiverGente - Equilibre seus pensamentos
+# DiverGente - Organize sua vida
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-## Sobre o Aplicativo
-
-Equilibre seus pensamentos.
-
-Com o **DiverGente**, você pode registrar suas emoções, tarefas a serem realizadas e também notas de áudio. Tenha um espaço pessoal para organizar seus pensamentos e acompanhar seu bem-estar.
-
-## Privacidade
-
-Sua privacidade é muito importante.
-
-Por isso, todos os dados são salvos **apenas no seu aparelho**, garantindo que você tenha total controle sobre suas informações.
-
-Caso queira, você tem a liberdade de **deletar todos os dados armazenados** no aplicativo a qualquer momento.
+[![Expo](https://img.shields.io/badge/Expo-SDK%2054-blue.svg)](https://expo.dev/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.81-green.svg)](https://reactnative.dev/)
 
 <p align="center">
-  <img src="./assets/images/splash-icon.png" width="150" alt="Ícone do aplicativo DiverGente">
+  <img src="./src/assets/images/splash-icon.png" width="150" alt="Ícone do aplicativo DiverGente">
 </p>
 
-## Download apk
+## 📱 Sobre o Aplicativo
 
-https://github.com/phaleixo/DiverGente/releases/download/V1.0/DiverGente-V2.0.apk
+**DiverGente** é um aplicativo essencial com rotinas para organizar sua vida. Com ele você pode:
 
-## Download Code
+- 📅 **Calendário interativo** com visualização de eventos e feriados brasileiros
+- ✅ **Lista de tarefas** para organizar seu dia a dia
+- 📝 **Diário pessoal** para registrar seus pensamentos e emoções
+- 🎯 **Tomada de decisões** com auxílio visual
+- 🎨 **Temas personalizáveis** (claro, escuro e variações de cores)
 
-1. Clone Repository
+## ✨ Funcionalidades
 
-   ```
+### 🔐 Autenticação
+
+- Login com **email e senha**
+- Login com **Google** (OAuth)
+- **Autenticação biométrica** (digital/FaceID)
+- Recuperação de senha por email
+
+### 📅 Calendário
+
+- Visualização mensal com eventos
+- Marcação de **feriados brasileiros** (pode ser ativado/desativado)
+- Adicionar eventos personalizados com cores
+
+### ✅ Tarefas
+
+- Criar, editar e excluir tarefas
+- Marcar tarefas como concluídas
+- Visualização das tarefas do dia na tela inicial
+
+### 📝 Diário
+
+- Registrar entradas diárias
+- Espaço pessoal para reflexões
+
+### 🎯 Decisões
+
+- Ferramenta para auxiliar na tomada de decisões
+
+### ⚙️ Configurações
+
+- **Perfil do usuário** com foto (do Google ou personalizada)
+- **Seletor de temas** (múltiplas opções de cores)
+- **Tema claro/escuro** automático ou manual
+- **Excluir conta** com confirmação segura (senha ou Google)
+
+## 🔒 Privacidade e Segurança
+
+- Dados sincronizados com **Supabase** (backend seguro)
+- Autenticação segura com **SecureStore**
+- Opção de login biométrico
+- **Exclusão completa de conta** disponível
+
+## 📥 Download
+
+### APK (Android)
+
+[Baixar última versão](https://github.com/phaleixo/DiverGente/releases)
+
+## 🛠️ Desenvolvimento
+
+### Pré-requisitos
+
+- Node.js 18+
+- npm ou yarn
+- Expo CLI
+
+### Instalação
+
+1. Clone o repositório
+
+   ```bash
    git clone https://github.com/phaleixo/DiverGente.git
    ```
 
-2. Acess folder
+2. Acesse a pasta
 
    ```bash
    cd DiverGente
    ```
 
-3. Install dependencies
+3. Instale as dependências
 
    ```bash
    npm install
    ```
 
-4. Start the app
+4. Configure as variáveis de ambiente
 
    ```bash
-    npm start
+   cp .env.example .env.local
+   # Edite .env.local com suas credenciais do Supabase
    ```
 
-## Contato
+5. Inicie o app
+   ```bash
+   npm start
+   ```
 
-Desenvolvido por [phaleixo](https://github.com/phaleixo).
+### Scripts disponíveis
 
-[![GitHub](https://img.shields.io/badge/GitHub-Profile-blue?style=flat-square&logo=github)](https://github.com/phaleixo)
-[![Email](https://img.shields.io/badge/Email-phaleixo@outlook.com.br-red?style=flat-square&logo=mail)](mailto:phaleixo@outlook.com.br)
+- `npm start` - Inicia o Expo
+- `npm run android` - Inicia no Android
+- `npm run ios` - Inicia no iOS
+- `npm run web` - Inicia na web
+- `npm test` - Executa os testes
+- `npm run lint` - Verifica o código
 
-## Licença
+## 🏗️ Tecnologias
 
-DiverGente v1.0 licenciado sob a [MIT License](https://opensource.org/licenses/MIT).
+- **Framework**: [Expo](https://expo.dev/) SDK 54
+- **UI**: [React Native](https://reactnative.dev/) 0.81
+- **Navegação**: [Expo Router](https://expo.github.io/router/)
+- **Backend**: [Supabase](https://supabase.com/) (Auth + Database)
+- **Calendário**: [react-native-calendars](https://github.com/wix/react-native-calendars)
+- **Animações**: [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+
+## 📦 Principais Dependências
+
+| Pacote                    | Versão    | Descrição                     |
+| ------------------------- | --------- | ----------------------------- |
+| expo                      | ~54.0.27  | Framework principal           |
+| @supabase/supabase-js     | ^2.86.0   | Cliente Supabase              |
+| expo-router               | ~6.0.17   | Navegação baseada em arquivos |
+| expo-local-authentication | ~17.0.8   | Biometria                     |
+| expo-auth-session         | ~7.0.10   | OAuth (Google)                |
+| expo-secure-store         | ~15.0.8   | Armazenamento seguro          |
+| react-native-calendars    | ^1.1311.0 | Componente de calendário      |
+
+## 👤 Contato
+
+Desenvolvido por [phaleixo](https://github.com/phaleixo)
+
+[![GitHub](https://img.shields.io/badge/GitHub-phaleixo-181717?style=flat-square&logo=github)](https://github.com/phaleixo)
+[![Email](https://img.shields.io/badge/Email-phaleixo@outlook.com.br-0078D4?style=flat-square&logo=microsoft-outlook)](mailto:phaleixo@outlook.com.br)
+
+## 📄 Licença
+
+DiverGente v3.1.0 licenciado sob a [MIT License](https://opensource.org/licenses/MIT).
 
 ---
 
-## Dependências (versões das bibliotecas)
-
-- **dependencies**:
-
-  - `@expo/vector-icons`: ^14.0.2
-  - `@react-native-async-storage/async-storage`: 2.1.2
-  - `@react-navigation/bottom-tabs`: ^7.2.0
-  - `@react-navigation/native`: ^7.0.14
-  - `expo`: ^53.0.24
-  - `expo-blur`: ~14.1.5
-  - `expo-constants`: ~17.1.7
-  - `expo-document-picker`: ~13.1.6
-  - `expo-file-system`: ~18.1.11
-  - `expo-font`: ~13.3.2
-  - `expo-haptics`: ~14.1.4
-  - `expo-linking`: ~7.1.7
-  - `expo-router`: ^5.1.7
-  - `expo-sharing`: ~13.1.5
-  - `expo-splash-screen`: ~0.30.10
-  - `expo-status-bar`: ~2.2.3
-  - `expo-symbols`: ~0.4.5
-  - `expo-web-browser`: ~14.2.0
-  - `react`: 19.0.0
-  - `react-native`: ^0.79.6
-  - `react-native-calendars`: ^1.1311.0
-  - `react-native-reanimated`: ~3.17.4
-  - `react-native-safe-area-context`: 5.4.0
-  - `react-native-screens`: ~4.11.1
-  - `react-native-webview`: 13.13.5
-
-- **devDependencies**:
-  - `@babel/core`: ^7.25.2
-  - `@types/jest`: ^29.5.12
-  - `@types/react`: ~19.0.10
-  - `@types/react-native-vector-icons`: ^6.4.18
+<p align="center">
+  Feito por <a href="https://github.com/phaleixo">phaleixo</a>
+</p>
   - `@types/react-test-renderer`: ^18.3.0
   - `jest`: ^29.2.1
   - `jest-expo`: ^53.0.10
