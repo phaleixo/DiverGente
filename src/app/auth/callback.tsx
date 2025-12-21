@@ -1,24 +1,11 @@
 import { useEffect } from "react";
-import {
-  View,
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  useColorScheme,
-} from "react-native";
-import {
-  useRouter,
-  useLocalSearchParams,
-  useGlobalSearchParams,
-} from "expo-router";
+import {View,ActivityIndicator,StyleSheet,Text,useColorScheme,} from "react-native";
+import {useRouter,useLocalSearchParams,useGlobalSearchParams,} from "expo-router";
 import * as Linking from "expo-linking";
 import { supabase } from "@/config/supabase";
 import { Colors } from "@/constants/Colors";
 
-/**
- * Esta tela trata o callback do OAuth (login com Google).
- * Ela processa os tokens recebidos e redireciona o usuário.
- */
+
 export default function AuthCallback() {
   const router = useRouter();
   const params = useLocalSearchParams();

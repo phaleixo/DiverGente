@@ -1,28 +1,8 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  Animated,
-  Modal,
-  StyleSheet,
-  useColorScheme,
-} from "react-native";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Modal, StyleSheet, useColorScheme, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  fetchDiaryEntries,
-  upsertDiaryEntry as sbUpsertDiaryEntry,
-  deleteDiaryEntry as sbDeleteDiaryEntry,
-} from "@/services/supabaseService";
+import { fetchDiaryEntries, upsertDiaryEntry as sbUpsertDiaryEntry, deleteDiaryEntry as sbDeleteDiaryEntry } from "@/services/supabaseService";
 import Card from "@/components/Card";
 import FAB from "@/components/FAB";
 import Title from "@/components/Title";
@@ -223,70 +203,84 @@ const Diario: React.FC = () => {
               setModalVisible(!modalVisible);
             }}
           >
-            <View style={styles.modalBackground}>
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalTitle}>
-                    Como você está se sentindo?{'      '}
-                  </Text>
-                  <View style={styles.emotionsContainer}>
-                    {emotions.map((emotion) => {
-                      const isSelected = selectedEmotion === emotion.value;
-                      return (
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              style={{ flex: 1 }}
+            >
+              <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                keyboardShouldPersistTaps="handled"
+              >
+                <View style={styles.modalBackground}>
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      <Text style={styles.modalTitle}>
+                        Como você está se sentindo?{"      "}
+                      </Text>
+                      <View style={styles.emotionsContainer}>
+                        {emotions.map((emotion) => {
+                          const isSelected = selectedEmotion === emotion.value;
+                          return (
+                            <TouchableOpacity
+                              key={emotion.value}
+                              style={[
+                                styles.emotionButton,
+                                isSelected && styles.selectedEmotionButton,
+                              ]}
+                              onPress={() =>
+                                setSelectedEmotion(
+                                  isSelected ? "" : emotion.value
+                                )
+                              }
+                            >
+                              <Text style={styles.emotionEmoji}>
+                                {emotion.emoji}
+                              </Text>
+                              <Text
+                                style={[
+                                  styles.emotionName,
+                                  isSelected && { color: theme.onPrimary },
+                                ]}
+                              >
+                                {emotion.label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                      <TextInput
+                        placeholder="Escreva sobre seu dia..."
+                        placeholderTextColor={theme.outline}
+                        value={entryText}
+                        onChangeText={setEntryText}
+                        style={styles.input}
+                        multiline
+                        numberOfLines={4}
+                      />
+                      <View style={styles.modalButtonRow}>
                         <TouchableOpacity
-                          key={emotion.value}
-                          style={[
-                            styles.emotionButton,
-                            isSelected && styles.selectedEmotionButton,
-                          ]}
-                          onPress={() =>
-                            setSelectedEmotion(isSelected ? "" : emotion.value)
-                          }
+                          onPress={addEntry}
+                          style={styles.modalAddButton}
                         >
-                          <Text style={styles.emotionEmoji}>
-                            {emotion.emoji}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.emotionName,
-                              isSelected && { color: theme.onPrimary },
-                            ]}
-                          >
-                            {emotion.label}
+                          <Text style={styles.modalAddButtonText}>Salvar</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setModalVisible(false);
+                            setSelectedEmotion("");
+                          }}
+                          style={styles.modalCancelButton}
+                        >
+                          <Text style={styles.modalCancelButtonText}>
+                            Cancelar{"  "}
                           </Text>
                         </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                  <TextInput
-                    placeholder="Escreva sobre seu dia..."
-                    placeholderTextColor={theme.outline}
-                    value={entryText}
-                    onChangeText={setEntryText}
-                    style={styles.input}
-                    multiline
-                    numberOfLines={4}
-                  />
-                  <View style={styles.modalButtonRow}>
-                    <TouchableOpacity
-                      onPress={addEntry}
-                      style={styles.modalAddButton}
-                    >
-                      <Text style={styles.modalAddButtonText}>Salvar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setModalVisible(false);
-                        setSelectedEmotion("");
-                      }}
-                      style={styles.modalCancelButton}
-                    >
-                      <Text style={styles.modalCancelButtonText}>Cancelar{'  '}</Text>
-                    </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </View>
+              </ScrollView>
+            </KeyboardAvoidingView>
           </Modal>
 
           <Modal

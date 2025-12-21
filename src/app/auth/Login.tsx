@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  useColorScheme,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  ScrollView,
-  Platform,
-} from "react-native";
+import { View,Text,TextInput,TouchableOpacity,StyleSheet,useColorScheme,Alert,KeyboardAvoidingView,ScrollView,Platform,Image,} from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -21,9 +9,8 @@ import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendPasswordResetEmail } from "@/services/supabaseService";
 import { supabase } from "@/config/supabase";
-import { Ionicons } from "@expo/vector-icons";
 
-// Necessário para fechar o navegador corretamente após o OAuth
+
 WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen: React.FC = () => {
@@ -400,23 +387,34 @@ const LoginScreen: React.FC = () => {
 
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
-            <Text style={styles.dividerText}>ou {" "}</Text>
+            <Text style={styles.dividerText}>ou </Text>
             <View style={styles.divider} />
           </View>
 
           <TouchableOpacity
             onPress={handleGoogleSignIn}
-            style={styles.googleButton}
+            style={[
+              styles.googleButtonModern,
+              {
+                backgroundColor: isDarkMode ? "#000" : "#fff",
+                borderColor: isDarkMode ? "#222" : "#ddd",
+              },
+            ]}
             disabled={loading}
+            activeOpacity={0.85}
           >
-            <Ionicons
-              name="logo-google"
-              size={20}
-              color="#fff"
-              style={styles.googleIcon}
+            <Image
+              source={require("@/assets/images/google-logo.png")}
+              style={styles.googleLogo}
+              resizeMode="contain"
             />
-            <Text style={styles.googleButtonText}>
-              {loading ? "Entrando..." : "Continuar com Google"}
+            <Text
+              style={[
+                styles.googleButtonTextModern,
+                { color: isDarkMode ? "#fff" : "#222" },
+              ]}
+            >
+              {loading ? "Entrando..." : "Entrar com Google"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -514,22 +512,31 @@ const dynamicStyles = (isDarkMode: boolean) =>
       color: isDarkMode ? Colors.dark.onSurface : Colors.light.onSurface,
       fontSize: 14,
     },
-    googleButton: {
+    googleButtonModern: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#DB4437",
-      padding: 14,
-      borderRadius: 10,
+      borderWidth: 1.5,
+      borderRadius: 24,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
       width: "100%",
+      marginTop: 8,
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 4,
+      elevation: 2,
     },
-    googleIcon: {
-      marginRight: 10,
+    googleLogo: {
+      width: 22,
+      height: 22,
+      marginRight: 12,
     },
-    googleButtonText: {
-      color: "#fff",
-      fontWeight: "700",
+    googleButtonTextModern: {
+      fontWeight: "600",
       fontSize: 16,
+      letterSpacing: 0.2,
     },
   });
 

@@ -45,15 +45,15 @@ export async function fetchTasks() {
 export async function upsertTask(task: RawTask) {
   const user = await getCurrentUser();
   if (!user) return { data: null, error: new Error('No user') };
-  const payload = {
+  const payload: any = {
     id: task.id.toString(),
     text: task.text,
     completed: task.completed,
-    created_at: task.createdAt,
-    completed_at: task.completedAt || null,
     due_date: task.dueDate || null,
     user_id: user.id,
   };
+  // Só envia completed_at se existir
+  if (task.completedAt) payload.completed_at = task.completedAt;
   const { data, error } = await supabase.from('tasks').upsert(payload, { onConflict: 'id' }).select();
   return { data, error };
 }

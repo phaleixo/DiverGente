@@ -9,6 +9,9 @@ import {
   Button,
   FlatList,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -593,142 +596,152 @@ const CalendarScreen = () => {
 
       {/* Modal de Adição de Evento */}
       <Modal visible={eventModalVisible} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              Adicionar evento de {formatDate(startDate)} a{" "}
-              {formatDate(endDate)}
-            </Text>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  Adicionar evento de {formatDate(startDate)} a{" "}
+                  {formatDate(endDate)}
+                </Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Digite o evento"
-              value={eventText}
-              onChangeText={setEventText}
-              placeholderTextColor={themeColors.onSurfaceDisabled}
-              maxLength={50}
-            />
-
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setShowStartCalendar(true)}
-            >
-              <Text style={{ color: themeColors.onSurface }}>
-                Data início: {formatDate(startDate)}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.input}
-              onPress={() => setShowEndCalendar(true)}
-            >
-              <Text style={{ color: themeColors.onSurface }}>
-                Data fim: {formatDate(endDate)}
-              </Text>
-            </TouchableOpacity>
-
-            {showStartCalendar && (
-              <View style={styles.calendarContainer}>
-                <Calendar
-                  current={startDate}
-                  onDayPress={handleStartDateSelect}
-                  markedDates={{
-                    [startDate]: {
-                      selected: true,
-                      selectedColor: themeColors.primary,
-                    },
-                  }}
-                  theme={calendarTheme}
+                <TextInput
+                  style={styles.input}
+                  placeholder="Digite o evento"
+                  value={eventText}
+                  onChangeText={setEventText}
+                  placeholderTextColor={themeColors.onSurfaceDisabled}
+                  maxLength={50}
                 />
-                <Button
-                  title="Fechar"
-                  onPress={() => setShowStartCalendar(false)}
-                />
-              </View>
-            )}
 
-            {showEndCalendar && (
-              <View style={styles.calendarContainer}>
-                <Calendar
-                  current={endDate}
-                  onDayPress={handleEndDateSelect}
-                  markedDates={{
-                    [endDate]: {
-                      selected: true,
-                      selectedColor: themeColors.primary,
-                    },
-                    ...(new Date(endDate) < new Date(startDate)
-                      ? {
-                          [startDate]: {
-                            selected: true,
-                            selectedColor: themeColors.error,
-                          },
-                        }
-                      : {}),
-                  }}
-                  minDate={startDate}
-                  theme={calendarTheme}
-                />
-                <Button
-                  title="Fechar"
-                  onPress={() => setShowEndCalendar(false)}
-                />
-              </View>
-            )}
-
-            <View style={styles.colorPicker}>
-              {availableColors.map((color) => (
                 <TouchableOpacity
-                  key={color}
-                  onPress={() => setEventColor(color)}
-                  style={[
-                    styles.colorOption,
-                    {
-                      backgroundColor: color,
-                      borderColor:
-                        eventColor === color
-                          ? isDarkMode
-                            ? "#ffffff"
-                            : "#000000"
-                          : themeColors.outline,
-                      borderWidth: eventColor === color ? 2 : 1,
-                      transform:
-                        eventColor === color
-                          ? [{ scale: 1.04 }]
-                          : [{ scale: 1 }],
-                      ...(eventColor === color && isDarkMode
-                        ? {
-                            shadowColor: "#ffffff",
-                            shadowOffset: { width: 0, height: 1 },
-                            shadowOpacity: 0.12,
-                            shadowRadius: 3,
-                            elevation: 4,
-                          }
-                        : {}),
-                    },
-                  ]}
-                />
-              ))}
-            </View>
+                  style={styles.input}
+                  onPress={() => setShowStartCalendar(true)}
+                >
+                  <Text style={{ color: themeColors.onSurface }}>
+                    Data início: {formatDate(startDate)}
+                  </Text>
+                </TouchableOpacity>
 
-            <View style={styles.modalButtons}>
-              <Button
-                title="Salvar Evento"
-                color={themeColors.primary}
-                onPress={addEvent}
-              />
-              <View style={styles.space} />
-              <Button
-                title="Cancelar"
-                color={themeColors.outline}
-                onPress={() => {
-                  setEventModalVisible(false);
-                  resetEventForm();
-                }}
-              />
+                <TouchableOpacity
+                  style={styles.input}
+                  onPress={() => setShowEndCalendar(true)}
+                >
+                  <Text style={{ color: themeColors.onSurface }}>
+                    Data fim: {formatDate(endDate)}
+                  </Text>
+                </TouchableOpacity>
+
+                {showStartCalendar && (
+                  <View style={styles.calendarContainer}>
+                    <Calendar
+                      current={startDate}
+                      onDayPress={handleStartDateSelect}
+                      markedDates={{
+                        [startDate]: {
+                          selected: true,
+                          selectedColor: themeColors.primary,
+                        },
+                      }}
+                      theme={calendarTheme}
+                    />
+                    <Button
+                      title="Fechar"
+                      onPress={() => setShowStartCalendar(false)}
+                    />
+                  </View>
+                )}
+
+                {showEndCalendar && (
+                  <View style={styles.calendarContainer}>
+                    <Calendar
+                      current={endDate}
+                      onDayPress={handleEndDateSelect}
+                      markedDates={{
+                        [endDate]: {
+                          selected: true,
+                          selectedColor: themeColors.primary,
+                        },
+                        ...(new Date(endDate) < new Date(startDate)
+                          ? {
+                              [startDate]: {
+                                selected: true,
+                                selectedColor: themeColors.error,
+                              },
+                            }
+                          : {}),
+                      }}
+                      minDate={startDate}
+                      theme={calendarTheme}
+                    />
+                    <Button
+                      title="Fechar"
+                      onPress={() => setShowEndCalendar(false)}
+                    />
+                  </View>
+                )}
+
+                <View style={styles.colorPicker}>
+                  {availableColors.map((color) => (
+                    <TouchableOpacity
+                      key={color}
+                      onPress={() => setEventColor(color)}
+                      style={[
+                        styles.colorOption,
+                        {
+                          backgroundColor: color,
+                          borderColor:
+                            eventColor === color
+                              ? isDarkMode
+                                ? "#ffffff"
+                                : "#000000"
+                              : themeColors.outline,
+                          borderWidth: eventColor === color ? 2 : 1,
+                          transform:
+                            eventColor === color
+                              ? [{ scale: 1.04 }]
+                              : [{ scale: 1 }],
+                          ...(eventColor === color && isDarkMode
+                            ? {
+                                shadowColor: "#ffffff",
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: 0.12,
+                                shadowRadius: 3,
+                                elevation: 4,
+                              }
+                            : {}),
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
+
+                <View style={styles.modalButtons}>
+                  <Button
+                    title="Salvar Evento"
+                    color={themeColors.primary}
+                    onPress={addEvent}
+                  />
+                  <View style={styles.space} />
+                  <Button
+                    title="Cancelar"
+                    color={themeColors.outline}
+                    onPress={() => {
+                      setEventModalVisible(false);
+                      resetEventForm();
+                    }}
+                  />
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Modal de Confirmação de Exclusão */}

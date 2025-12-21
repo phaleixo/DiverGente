@@ -2,12 +2,7 @@ import Tabs from "expo-router/tabs";
 import React, { useMemo } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import {
-  TouchableWithoutFeedback,
-  View,
-  StatusBar,
-  Platform,
-} from "react-native";
+import { TouchableWithoutFeedback, View, StatusBar, Platform } from "react-native";
 import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
@@ -23,14 +18,10 @@ export default function TabLayout() {
   );
   const insets = useSafeAreaInsets();
 
-  // No Android com navegação por botões, insets.bottom será > 0
-  // Adiciona margem base de 12 + o inset inferior para respeitar a área segura
+  
   const bottomMargin =
     Platform.OS === "android" ? Math.max(12, insets.bottom + 12) : 12;
 
-  // Ajusta o marginTop do ícone baseado no tipo de navegação
-  // Com navegação por gestos (insets.bottom pequeno), precisa de menos marginTop
-  // Com navegação por botões (insets.bottom maior), precisa de mais marginTop
   const iconMarginTop =
     Platform.OS === "android" ? (insets.bottom > 28 ? 46 : 28) : 36;
 
@@ -63,7 +54,7 @@ export default function TabLayout() {
       <AuthGate />
       <Tabs
         screenOptions={{
-          animation: "shift",
+          animation: "none",
           tabBarActiveTintColor: theme.primary,
           tabBarInactiveTintColor: theme.outline,
           headerShown: false,

@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Image,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Linking,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Image, Text, StyleSheet, ScrollView, Linking, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Title from "@/components/Title";
 import ProfileHeader from "@/components/ProfileHeader";
@@ -16,6 +8,8 @@ import DeleteAccountButton from "@/components/DeleteAccountButton";
 import ThemePicker from "@/components/ThemePicker";
 import HolidayToggle from "@/components/HolidayToggle";
 import { useTheme } from "@/contexts/ThemeContext";
+import Constants from 'expo-constants';
+
 
 const Config: React.FC = () => {
   const isDarkMode = useColorScheme() === "dark";
@@ -43,9 +37,9 @@ const Config: React.FC = () => {
             style={styles.localImage}
           />
           <Text style={styles.footer}>
-            DiverGente v3.1.0 licenciado sob a MIT License.
-            {"\n"}
-            Desenvolvido por phaleixo.
+  DiverGente v{Constants.expoConfig?.version || "-"} licenciado sob a MIT License.
+  {"\n"}
+  Desenvolvido por phaleixo.
             {"\n"}
             GitHub:{" "}
             <Text

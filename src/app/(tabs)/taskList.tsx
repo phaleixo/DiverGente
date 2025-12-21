@@ -1,29 +1,8 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  Animated,
-  Modal,
-  StyleSheet,
-  useColorScheme,
-  Alert,
-} from "react-native";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { View,Text, TextInput,TouchableOpacity,FlatList,Animated,Modal,StyleSheet,useColorScheme,Alert,KeyboardAvoidingView,ScrollView,Platform,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  fetchTasks,
-  upsertTask as sbUpsertTask,
-  deleteTask as sbDeleteTask,
-} from "@/services/supabaseService";
+import {fetchTasks,upsertTask as sbUpsertTask,deleteTask as sbDeleteTask,} from "@/services/supabaseService";
 import { Calendar } from "react-native-calendars";
 import Card from "@/components/Card";
 import FAB from "@/components/FAB";
@@ -36,7 +15,7 @@ interface Task {
   text: string;
   completed: boolean;
   createdAt: string;
-  completedAt?: string;
+  completedAt?: string | null;
   dueDate?: string;
 }
 
@@ -111,12 +90,15 @@ const TaskList: React.FC = () => {
     setModalVisible(false);
   };
 
-  const deleteTask = async (taskId: number) => {
-    const updatedTasks = sortTasks(tasks.filter((task) => task.id !== taskId));
+  const deleteTask = async (taskId: number | string) => {
+    const idStr = taskId.toString();
+    const updatedTasks = sortTasks(
+      tasks.filter((task) => task.id.toString() !== idStr)
+    );
     setTasks(updatedTasks);
     await AsyncStorage.setItem("tasks", JSON.stringify(updatedTasks));
     try {
-      await sbDeleteTask(taskId);
+      await sbDeleteTask(idStr);
     } catch (e) {
       // ignore
     }
@@ -141,8 +123,8 @@ const TaskList: React.FC = () => {
             ...task,
             completed: !task.completed,
             completedAt: !task.completed
-              ? new Date().toLocaleString()
-              : undefined,
+              ? new Date().toISOString() // ISO para o Supabase
+              : null, // null para não concluído
           }
         : task
     );
@@ -368,95 +350,107 @@ const TaskList: React.FC = () => {
               setModalVisible(!modalVisible);
             }}
           >
-            <View style={styles.modalBackground}>
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalTitle}>
-                    Adicionar nova tarefa {"    "}
-                  </Text>
-                  <TextInput
-                    placeholder="Digite o título da tarefa"
-                    placeholderTextColor={theme.outline}
-                    value={taskText}
-                    onChangeText={setTaskText}
-                    style={styles.input}
-                    maxLength={90}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowCalendar(true)}
-                    style={styles.dueDateButton}
-                  >
-                    <Text style={styles.dueDateButtonText}>
-                      {dueDate
-                        ? `Vencimento: ${dueDate}`
-                        : "Selecionar Vencimento"}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <Calendar
-                    onDayPress={handleDayPress}
-                    markedDates={
-                      dueDate
-                        ? {
-                            [dueDate]: {
-                              selected: true,
-                              selectedColor: theme.primary,
-                            },
-                          }
-                        : {}
-                    }
-                    theme={{
-                      backgroundColor: theme.background,
-                      calendarBackground: theme.background,
-                      textSectionTitleColor: theme.onSurface,
-                      selectedDayBackgroundColor: theme.primary,
-                      selectedDayTextColor: theme.onSurface,
-                      todayTextColor: theme.primary,
-                      dayTextColor: theme.onSurface,
-                      textDisabledColor: theme.onSurface,
-                      dotColor: theme.primary,
-                      selectedDotColor: theme.onSurface,
-                      arrowColor: theme.primary,
-                      monthTextColor: theme.onSurface,
-                      textDayFontWeight: "400",
-                      textMonthFontWeight: "600",
-                      textDayHeaderFontWeight: "400",
-                      textDayFontSize: 15,
-                      textMonthFontSize: 16,
-                      textDayHeaderFontSize: 13,
-                    }}
-                    style={{
-                      borderRadius: 12,
-                      marginBottom: 8,
-                      elevation: 0,
-                      shadowOpacity: 0,
-                      borderWidth: 0,
-                    }}
-                  />
-
-                  <View style={styles.modalButtonRow}>
-                    <TouchableOpacity
-                      onPress={addTask}
-                      style={styles.modalAddButton}
-                    >
-                      <Text style={styles.modalAddButtonText}>Adicionar </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setModalVisible(false);
-                        setShowCalendar(false);
-                        setDueDate(undefined);
-                      }}
-                      style={styles.modalCancelButton}
-                    >
-                      <Text style={styles.modalCancelButtonText}>
-                        Cancelar{" "}
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : "height"}
+              style={{ flex: 1 }}
+            >
+              <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                keyboardShouldPersistTaps="handled"
+              >
+                <View style={styles.modalBackground}>
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      <Text style={styles.modalTitle}>
+                        Adicionar nova tarefa {"    "}
                       </Text>
-                    </TouchableOpacity>
+                      <TextInput
+                        placeholder="Digite o título da tarefa"
+                        placeholderTextColor={theme.outline}
+                        value={taskText}
+                        onChangeText={setTaskText}
+                        style={styles.input}
+                        maxLength={90}
+                      />
+                      <TouchableOpacity
+                        onPress={() => setShowCalendar(true)}
+                        style={styles.dueDateButton}
+                      >
+                        <Text style={styles.dueDateButtonText}>
+                          {dueDate
+                            ? `Vencimento: ${dueDate}`
+                            : "Selecionar Vencimento"}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <Calendar
+                        onDayPress={handleDayPress}
+                        markedDates={
+                          dueDate
+                            ? {
+                                [dueDate]: {
+                                  selected: true,
+                                  selectedColor: theme.primary,
+                                },
+                              }
+                            : {}
+                        }
+                        theme={{
+                          backgroundColor: theme.background,
+                          calendarBackground: theme.background,
+                          textSectionTitleColor: theme.onSurface,
+                          selectedDayBackgroundColor: theme.primary,
+                          selectedDayTextColor: theme.onSurface,
+                          todayTextColor: theme.primary,
+                          dayTextColor: theme.onSurface,
+                          textDisabledColor: theme.onSurface,
+                          dotColor: theme.primary,
+                          selectedDotColor: theme.onSurface,
+                          arrowColor: theme.primary,
+                          monthTextColor: theme.onSurface,
+                          textDayFontWeight: "400",
+                          textMonthFontWeight: "600",
+                          textDayHeaderFontWeight: "400",
+                          textDayFontSize: 15,
+                          textMonthFontSize: 16,
+                          textDayHeaderFontSize: 13,
+                        }}
+                        style={{
+                          borderRadius: 12,
+                          marginBottom: 8,
+                          elevation: 0,
+                          shadowOpacity: 0,
+                          borderWidth: 0,
+                        }}
+                      />
+
+                      <View style={styles.modalButtonRow}>
+                        <TouchableOpacity
+                          onPress={addTask}
+                          style={styles.modalAddButton}
+                        >
+                          <Text style={styles.modalAddButtonText}>
+                            Adicionar{" "}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setModalVisible(false);
+                            setShowCalendar(false);
+                            setDueDate(undefined);
+                          }}
+                          style={styles.modalCancelButton}
+                        >
+                          <Text style={styles.modalCancelButtonText}>
+                            Cancelar{" "}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </View>
+              </ScrollView>
+            </KeyboardAvoidingView>
           </Modal>
 
           <Modal
