@@ -148,9 +148,3 @@ Desenvolvido por [phaleixo](https://github.com/phaleixo)
 ## 📄 Licença
 
 DiverGente v3.1.0 licenciado sob a [MIT License](https://opensource.org/licenses/MIT).
-
----
-
-<p align="center">
-  Feito por <a href="https://github.com/phaleixo">phaleixo</a>
-</p>
