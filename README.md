@@ -154,9 +154,3 @@ DiverGente v3.1.0 licenciado sob a [MIT License](https://opensource.org/licenses
 <p align="center">
   Feito por <a href="https://github.com/phaleixo">phaleixo</a>
 </p>
-  - `@types/react-test-renderer`: ^18.3.0
-  - `jest`: ^29.2.1
-  - `jest-expo`: ^53.0.10
-  - `typescript`: ^5.3.3
-
-Observação: para publicar na Google Play é recomendado usar `AAB` (app bundle). Para gerar APK com EAS, use `eas.json` com `android.buildType: "apk"` ou rode `eas build -p android --profile <perfil>`.
